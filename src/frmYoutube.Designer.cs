@@ -53,7 +53,7 @@
             this.btnLoadVid = new System.Windows.Forms.Button();
             this.btnMerge = new System.Windows.Forms.Button();
             this.ckAutoparse = new System.Windows.Forms.CheckBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.cbGroup = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // btnParse
@@ -263,23 +263,23 @@
             this.ckAutoparse.Text = "Auto parse";
             this.ckAutoparse.UseVisualStyleBackColor = true;
             // 
-            // comboBox1
+            // cbGroup
             // 
-            this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
-            this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(106, 15);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 23);
-            this.comboBox1.TabIndex = 3;
-            this.comboBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
+            this.cbGroup.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.cbGroup.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cbGroup.FormattingEnabled = true;
+            this.cbGroup.Location = new System.Drawing.Point(106, 15);
+            this.cbGroup.Name = "cbGroup";
+            this.cbGroup.Size = new System.Drawing.Size(121, 23);
+            this.cbGroup.TabIndex = 3;
+            this.cbGroup.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
             // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(700, 370);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.cbGroup);
             this.Controls.Add(this.ckAutoparse);
             this.Controls.Add(this.lvDownload);
             this.Controls.Add(this.lvAudio);
@@ -324,6 +324,6 @@
         private System.Windows.Forms.Button btnMerge;
         private System.Windows.Forms.CheckBox ckAutoparse;
         private System.Windows.Forms.ColumnHeader colGroup;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox cbGroup;
     }
 }

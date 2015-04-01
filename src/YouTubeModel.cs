@@ -13,6 +13,9 @@ public class YoutubeDlInfo
     public string Format_Id { get; set; }
     public List<Formats> Formats { get; set; }
 
+    public string error_message { get; set; }
+    public bool error { get; set; }
+
     public static string[] GetVideoIDFromUrl(string url)
     {
         url = url.Substring(url.IndexOf("?") + 1);

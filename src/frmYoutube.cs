@@ -24,7 +24,7 @@ namespace YoutubeDL
         ListViewItem currentLVItem;
         string download_path = @"F:\Downloads\Video\YDL";
         const string file_name_format = "{0}_{1}.{2}";
-        const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}.{3}\"";
+        const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
 
         Color UNLOADED = Color.Gray;
         Color LOADED = Color.Black;
@@ -54,7 +54,7 @@ namespace YoutubeDL
             }
 
             // load group list to combobox
-            comboBox1.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+            cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
         }
 
         private void lvVideo_Click(object sender, EventArgs e)
@@ -80,6 +80,7 @@ namespace YoutubeDL
 
             var vid = (DownloadVid)currentLVItem.Tag;
             vid.ext = vF.Ext;
+            vid.filename = new Regex(namePattern).Replace(vid.title, "_") + "." + vF.Ext;
             vid.vidFID = vF.Format_Id;
             vid.vidUrl = vF.Url;
             vid.vidFilename = string.Format(file_name_format, vid.vid, vid.vidFID, vF.Ext);
@@ -107,7 +108,7 @@ namespace YoutubeDL
 
             currentLVItem = lvDownload.SelectedItems[0];
             var vid = (DownloadVid)currentLVItem.Tag;
-            comboBox1.Text = vid.group;
+            cbGroup.Text = vid.group;
 
             if (string.IsNullOrEmpty(vid.jsonYDL))
             {
@@ -179,12 +180,15 @@ namespace YoutubeDL
             {
                 if (lvDownload.Items.ContainsKey(id)) continue;
 
-                var vid = new DownloadVid { vid = id };
+                var vid = new DownloadVid { vid = id, group = (string)cbGroup.SelectedItem };
                 var item = InsertVidtoLV(vid);
 
                 if (autoparse)
                     EnqueueItem(item);
             }
+
+            lvDownload.Items[lvDownload.Items.Count - 1].EnsureVisible();
+            lvDownload.Items[lvDownload.Items.Count - 1].Selected = true;
 
             if (autoparse)
                 download_vid_format_In_Queue();
@@ -201,7 +205,7 @@ namespace YoutubeDL
                     new ListViewItem.ListViewSubItem(item, null) { Name = "resolution" },
                     new ListViewItem.ListViewSubItem(item, null) { Name = "ext" },
                     new ListViewItem.ListViewSubItem(item, null) { Name = "size" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "filename" },
+                    new ListViewItem.ListViewSubItem(item, null) { Name = "title" },
                     new ListViewItem.ListViewSubItem(item, null) { Name = "group" },
                 }
             );
@@ -215,7 +219,7 @@ namespace YoutubeDL
             subitems["resolution"].Text = vid.resolution;
             subitems["ext"].Text = vid.ext;
             subitems["size"].Text = vid.size.HasValue ? (vid.size.Value * 1.0 / 1024 / 1024).ToString("0.00") + " MB" : null;
-            subitems["filename"].Text = vid.filename;
+            subitems["title"].Text = vid.title;
             subitems["group"].Text = vid.group;
             item.ForeColor = colorStatus[vid.status];
             item.Text = item.Name = vid.vid;
@@ -327,8 +331,7 @@ namespace YoutubeDL
         {
             object[] parameters = e.Argument as object[];
 
-            string message;
-            var vidInfo = LoadVideoInfo((string)parameters[1], out message);
+            var vidInfo = LoadVideoInfo((string)parameters[1]);
             e.Result = new object[]{
                     parameters[0], vidInfo
             };
@@ -341,23 +344,24 @@ namespace YoutubeDL
             var vidInfo = parameters[1] as YoutubeDlInfo;
             var vid = item.Tag as DownloadVid;
 
-            if (vidInfo == null)
+            if (vidInfo.error)
             {
+                var frmLog = frmYTLog.GetInstance(this);
+                frmLog.AddLog(vidInfo.error_message);
+                UpdateLVItem(item, vid);
+
                 item.ForeColor = Color.Red;
             }
             else
             {
                 vid.title = vidInfo.Title;
                 vid.status = vid.status > 1 ? 2 : 1;
-                vid.filename = new Regex(namePattern).Replace(vidInfo.Title, "_");
                 vid.jsonYDL = new JavaScriptSerializer().Serialize(vidInfo);
-                //vid.vidFID = vid.vidFilename = vid.vidUrl = null;
-                //vid.audFID = vid.audFilename = vid.audUrl = vid.ext = vid.resolution = null;
                 repos.InsertOrUpdate(vid);
-
                 UpdateLVItem(item, vid);
-                item.BackColor = Color.Transparent;
             }
+
+            item.BackColor = Color.Transparent;
 
             var bw = (BackgroundWorker)sender;
             if (queueItem.Count > 0)
@@ -373,9 +377,10 @@ namespace YoutubeDL
             }
         }
         
-        private YoutubeDlInfo LoadVideoInfo(string vidID, out string message)
+        private YoutubeDlInfo LoadVideoInfo(string vidID)
         {
-            StringBuilder sb = new StringBuilder("Start LoadVideoInfo: youtube-dl -j " + vidID);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Start LoadVideoInfo: youtube-dl -j " + vidID);
 
             var p = new Process
             {
@@ -399,13 +404,13 @@ namespace YoutubeDL
             YoutubeDlInfo vidInfo = null;
 
             if (string.IsNullOrEmpty(error) == false)
-                sb.AppendLine("ERROR: " + error);
+            {
+                vidInfo = new YoutubeDlInfo { error = true };
+                sb.AppendLine(error);
+            }
             else
             {
                 sb.AppendLine("Success LoadVideoInfo: " + vidID);
-                //var frmLog = frmYTLog.GetInstance(this);
-                //frmLog.AddLog(error);
-                //return null;
 
                 vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(res);
 
@@ -415,7 +420,7 @@ namespace YoutubeDL
                 vidInfo.Formats = vidFormats.Union(audFormats).ToList();
             }
 
-            message = sb.ToString();
+            vidInfo.error_message = sb.ToString();
             return vidInfo;
         }
         private bool ItemInProcessing(ListViewItem item)
@@ -444,12 +449,19 @@ namespace YoutubeDL
 
                 if (!complete) continue;
 
+                string desFolder = download_path
+                    + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
+                string desFilename = desFolder + "\\" + vid.filename;
+
+                if (!Directory.Exists(desFolder))
+                    Directory.CreateDirectory(desFolder);
+
                 var p = new Process
                 {
                     StartInfo =
                     {
                         FileName = "ffmpeg",
-                        Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, vid.filename, vid.ext),
+                        Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, desFilename),
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardError = true,
@@ -463,7 +475,7 @@ namespace YoutubeDL
                 int exitcode = p.ExitCode;
                 p.Close();
 
-                if (exitcode != 0 || File.Exists(download_path + "\\" + vid.filename + "." + vid.ext) == false)
+                if (exitcode != 0 || File.Exists(desFilename) == false)
                 {
                     var frmLog = frmYTLog.GetInstance(this);
                     frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
@@ -483,15 +495,15 @@ namespace YoutubeDL
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (!comboBox1.Items.Contains(comboBox1.Text))
-                    comboBox1.Items.Add(comboBox1.Text);
+                if (!cbGroup.Items.Contains(cbGroup.Text))
+                    cbGroup.Items.Add(cbGroup.Text);
                 ChangeGroupVid();
             }
         }
 
         void ChangeGroupVid()
         {
-            string group = comboBox1.Text;
+            string group = cbGroup.Text;
             foreach (ListViewItem item in lvDownload.SelectedItems)
             {
                 var vid = (DownloadVid)item.Tag;
