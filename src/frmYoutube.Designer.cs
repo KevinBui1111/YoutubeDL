@@ -54,6 +54,7 @@
             this.btnMerge = new System.Windows.Forms.Button();
             this.ckAutoparse = new System.Windows.Forms.CheckBox();
             this.cbGroup = new System.Windows.Forms.ComboBox();
+            this.btnAutoSelect = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnParse
@@ -179,7 +180,7 @@
             this.lvDownload.TabIndex = 1;
             this.lvDownload.UseCompatibleStateImageBehavior = false;
             this.lvDownload.View = System.Windows.Forms.View.Details;
-            this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
+            this.lvDownload.SelectedIndexChanged += new System.EventHandler(this.lvDownload_SelectedIndexChanged);
             this.lvDownload.DragDrop += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragDrop);
             this.lvDownload.DragEnter += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragEnter);
             this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
@@ -268,17 +269,28 @@
             this.cbGroup.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
             this.cbGroup.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cbGroup.FormattingEnabled = true;
-            this.cbGroup.Location = new System.Drawing.Point(106, 15);
+            this.cbGroup.Location = new System.Drawing.Point(148, 15);
             this.cbGroup.Name = "cbGroup";
-            this.cbGroup.Size = new System.Drawing.Size(121, 23);
+            this.cbGroup.Size = new System.Drawing.Size(79, 23);
             this.cbGroup.TabIndex = 3;
-            this.cbGroup.KeyDown += new System.Windows.Forms.KeyEventHandler(this.comboBox1_KeyDown);
+            this.cbGroup.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbGroup_KeyDown);
+            // 
+            // btnAutoSelect
+            // 
+            this.btnAutoSelect.Location = new System.Drawing.Point(12, 12);
+            this.btnAutoSelect.Name = "btnAutoSelect";
+            this.btnAutoSelect.Size = new System.Drawing.Size(130, 27);
+            this.btnAutoSelect.TabIndex = 4;
+            this.btnAutoSelect.Text = "Auto select format";
+            this.btnAutoSelect.UseVisualStyleBackColor = true;
+            this.btnAutoSelect.Click += new System.EventHandler(this.btnAutoSelect_Click);
             // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(700, 370);
+            this.Controls.Add(this.btnAutoSelect);
             this.Controls.Add(this.cbGroup);
             this.Controls.Add(this.ckAutoparse);
             this.Controls.Add(this.lvDownload);
@@ -290,7 +302,7 @@
             this.Controls.Add(this.btnParse);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "frmYoutube";
+            this.Text = "YoutubeDL";
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -325,5 +337,6 @@
         private System.Windows.Forms.CheckBox ckAutoparse;
         private System.Windows.Forms.ColumnHeader colGroup;
         private System.Windows.Forms.ComboBox cbGroup;
+        private System.Windows.Forms.Button btnAutoSelect;
     }
 }
