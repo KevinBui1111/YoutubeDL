@@ -1,0 +1,17 @@
+CREATE TABLE [video] (
+  [vid] TEXT,
+  [vidFID] TEXT,
+  [vidURL] TEXT,
+  [vidFilename] TEXT,
+  [vidSize] INTEGER,
+  [audFID] TEXT,
+  [audURL] TEXT,
+  [audFilename] TEXT,
+  [audSize] INTEGER,
+  [resolution] TEXT,
+  [ext] TEXT,
+  [status] INTEGER,
+  [title] TEXT,
+  [size] INTEGER,
+  [jsonYDL] TEXT,
+  [jsonRecord] TEXT);
