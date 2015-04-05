@@ -36,6 +36,10 @@ namespace YoutubeDL
         }
         private void frmYoutube_Load(object sender, EventArgs e)
         {
+            ListViewHelper.EnableDoubleBuffer(lvDownload);
+            ListViewHelper.EnableDoubleBuffer(lvVideo);
+            ListViewHelper.EnableDoubleBuffer(lvAudio);
+
             colGroup.DisplayIndex = 0;
             colorStatus = new Dictionary<int,Color>();
             colorStatus.Add(0, UNLOADED);
@@ -86,10 +90,12 @@ namespace YoutubeDL
             vid.vidFID = vF.Format_Id;
             vid.vidUrl = vF.Url;
             vid.vidFilename = string.Format(file_name_format, vid.vid, vid.vidFID, vF.Ext);
+            if (vid.vid.StartsWith("-")) vid.vidFilename = "_" + vid.vidFilename;
             vid.vidSize = vF.FileSize;
             vid.audFID = aF.Format_Id;
             vid.audUrl = aF.Url;
             vid.audFilename = string.Format(file_name_format, vid.vid, vid.audFID, aF.Ext);
+            if (vid.vid.StartsWith("-")) vid.audFilename = "_" + vid.audFilename;
             vid.audSize = aF.FileSize;
             vid.resolution = vF.Width + " x " + vF.Height;
             vid.size = vF.FileSize + aF.FileSize;
@@ -259,7 +265,7 @@ namespace YoutubeDL
             foreach (var item in itemDown)
             {
                 var vid = (DownloadVid)item.Tag;
-                if (vid.status < 2) continue;
+                if (vid.status != 2) continue;
 
                 var p = new Process
                 {
