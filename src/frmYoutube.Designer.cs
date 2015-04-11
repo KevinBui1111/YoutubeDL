@@ -41,20 +41,23 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lvDownload = new System.Windows.Forms.ListView();
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colFormat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colResolution = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colExt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colVidsize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colFilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colGroup = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDateFormat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.col60fps = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnClick = new System.Windows.Forms.Button();
             this.btnLoadVid = new System.Windows.Forms.Button();
             this.btnMerge = new System.Windows.Forms.Button();
             this.ckAutoparse = new System.Windows.Forms.CheckBox();
             this.cbGroup = new System.Windows.Forms.ComboBox();
             this.btnAutoSelect = new System.Windows.Forms.Button();
+            this.lbStatus = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnParse
@@ -80,10 +83,10 @@
             this.lvVideo.FullRowSelect = true;
             this.lvVideo.GridLines = true;
             this.lvVideo.HideSelection = false;
-            this.lvVideo.Location = new System.Drawing.Point(12, 156);
+            this.lvVideo.Location = new System.Drawing.Point(12, 139);
             this.lvVideo.MultiSelect = false;
             this.lvVideo.Name = "lvVideo";
-            this.lvVideo.Size = new System.Drawing.Size(304, 202);
+            this.lvVideo.Size = new System.Drawing.Size(304, 198);
             this.lvVideo.TabIndex = 1;
             this.lvVideo.UseCompatibleStateImageBehavior = false;
             this.lvVideo.View = System.Windows.Forms.View.Details;
@@ -130,7 +133,7 @@
             this.lvAudio.Location = new System.Drawing.Point(12, 45);
             this.lvAudio.MultiSelect = false;
             this.lvAudio.Name = "lvAudio";
-            this.lvAudio.Size = new System.Drawing.Size(304, 105);
+            this.lvAudio.Size = new System.Drawing.Size(304, 88);
             this.lvAudio.TabIndex = 1;
             this.lvAudio.UseCompatibleStateImageBehavior = false;
             this.lvAudio.View = System.Windows.Forms.View.Details;
@@ -163,66 +166,77 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader2,
-            this.columnHeader11,
-            this.columnHeader9,
-            this.columnHeader6,
-            this.columnHeader7,
-            this.columnHeader8,
-            this.columnHeader10,
-            this.colGroup});
+            this.colID,
+            this.colStatus,
+            this.colFormat,
+            this.colResolution,
+            this.colExt,
+            this.colVidsize,
+            this.colFilename,
+            this.colGroup,
+            this.colDateFormat,
+            this.col60fps});
             this.lvDownload.FullRowSelect = true;
             this.lvDownload.GridLines = true;
             this.lvDownload.HideSelection = false;
             this.lvDownload.Location = new System.Drawing.Point(322, 45);
             this.lvDownload.Name = "lvDownload";
-            this.lvDownload.Size = new System.Drawing.Size(366, 313);
+            this.lvDownload.Size = new System.Drawing.Size(366, 316);
             this.lvDownload.TabIndex = 1;
             this.lvDownload.UseCompatibleStateImageBehavior = false;
             this.lvDownload.View = System.Windows.Forms.View.Details;
-            this.lvDownload.SelectedIndexChanged += new System.EventHandler(this.lvDownload_SelectedIndexChanged);
+            this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
             this.lvDownload.DragDrop += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragDrop);
             this.lvDownload.DragEnter += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragEnter);
             this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
+            this.lvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lvDownload_KeyUp);
             // 
-            // columnHeader2
+            // colID
             // 
-            this.columnHeader2.Text = "VID";
-            this.columnHeader2.Width = 55;
+            this.colID.Text = "VID";
+            this.colID.Width = 55;
             // 
-            // columnHeader11
+            // colStatus
             // 
-            this.columnHeader11.Text = "status";
-            this.columnHeader11.Width = 29;
+            this.colStatus.Text = "status";
+            this.colStatus.Width = 29;
             // 
-            // columnHeader9
+            // colFormat
             // 
-            this.columnHeader9.Text = "FID";
+            this.colFormat.Text = "FID";
             // 
-            // columnHeader6
+            // colResolution
             // 
-            this.columnHeader6.Text = "Resolution";
-            this.columnHeader6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader6.Width = 71;
+            this.colResolution.Text = "Resolution";
+            this.colResolution.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.colResolution.Width = 71;
             // 
-            // columnHeader7
+            // colExt
             // 
-            this.columnHeader7.Text = "Ext";
-            this.columnHeader7.Width = 48;
+            this.colExt.Text = "Ext";
+            this.colExt.Width = 48;
             // 
-            // columnHeader8
+            // colVidsize
             // 
-            this.columnHeader8.Text = "Size";
-            this.columnHeader8.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.columnHeader8.Width = 71;
+            this.colVidsize.Text = "Size";
+            this.colVidsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.colVidsize.Width = 71;
             // 
-            // columnHeader10
+            // colFilename
             // 
-            this.columnHeader10.Text = "File name";
+            this.colFilename.Text = "File name";
             // 
             // colGroup
             // 
             this.colGroup.Text = "Group";
+            // 
+            // colDateFormat
+            // 
+            this.colDateFormat.Text = "Date format";
+            // 
+            // col60fps
+            // 
+            this.col60fps.Text = "fps";
             // 
             // btnClick
             // 
@@ -285,11 +299,24 @@
             this.btnAutoSelect.UseVisualStyleBackColor = true;
             this.btnAutoSelect.Click += new System.EventHandler(this.btnAutoSelect_Click);
             // 
+            // lbStatus
+            // 
+            this.lbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbStatus.BackColor = System.Drawing.Color.DodgerBlue;
+            this.lbStatus.ForeColor = System.Drawing.Color.White;
+            this.lbStatus.Location = new System.Drawing.Point(12, 340);
+            this.lbStatus.Name = "lbStatus";
+            this.lbStatus.Size = new System.Drawing.Size(304, 21);
+            this.lbStatus.TabIndex = 5;
+            this.lbStatus.Text = "label1";
+            this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(700, 370);
+            this.Controls.Add(this.lbStatus);
             this.Controls.Add(this.btnAutoSelect);
             this.Controls.Add(this.cbGroup);
             this.Controls.Add(this.ckAutoparse);
@@ -324,13 +351,13 @@
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ListView lvDownload;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.ColumnHeader columnHeader8;
-        private System.Windows.Forms.ColumnHeader columnHeader9;
-        private System.Windows.Forms.ColumnHeader columnHeader10;
-        private System.Windows.Forms.ColumnHeader columnHeader11;
+        private System.Windows.Forms.ColumnHeader colID;
+        private System.Windows.Forms.ColumnHeader colResolution;
+        private System.Windows.Forms.ColumnHeader colExt;
+        private System.Windows.Forms.ColumnHeader colVidsize;
+        private System.Windows.Forms.ColumnHeader colFormat;
+        private System.Windows.Forms.ColumnHeader colFilename;
+        private System.Windows.Forms.ColumnHeader colStatus;
         private System.Windows.Forms.Button btnClick;
         private System.Windows.Forms.Button btnLoadVid;
         private System.Windows.Forms.Button btnMerge;
@@ -338,5 +365,8 @@
         private System.Windows.Forms.ColumnHeader colGroup;
         private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.Button btnAutoSelect;
+        private System.Windows.Forms.ColumnHeader colDateFormat;
+        private System.Windows.Forms.ColumnHeader col60fps;
+        private System.Windows.Forms.Label lbStatus;
     }
 }

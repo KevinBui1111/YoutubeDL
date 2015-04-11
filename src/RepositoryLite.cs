@@ -7,16 +7,21 @@ using System.Configuration;
 using YoutubeDL.Properties;
 using System.Data;
 using System.Web.Script.Serialization;
+using System.Text;
 
 namespace YoutubeDL.Models
 {
     public class RepositoryLite
     {
         SQLiteDatabase db;
+        StringBuilder script;
+        bool begin_update;
         public RepositoryLite()
         {
             var connectionString = "Data Source=ytvid.db";
             db = new SQLiteDatabase(connectionString);
+
+            script = new StringBuilder();
         }
 
         internal DownloadVid[] LoadDownloadVideo()
@@ -29,7 +34,6 @@ namespace YoutubeDL.Models
                 return vid;
             }).ToArray();
         }
-
 
         internal void InsertOrUpdate(DownloadVid c)
         {
@@ -45,7 +49,7 @@ namespace YoutubeDL.Models
             if (GetVid(c.vid) != null)
                 sqlcommand = Resources.UPDATE;
 
-            db.ExecuteNonQuery(string.Format(sqlcommand,
+            script.AppendLine(string.Format(sqlcommand,
                 SQLiteDatabase.Escape(c.vid),
                 SQLiteDatabase.Escape(c.vidFID),
                 SQLiteDatabase.Escape(c.vidUrl),
@@ -63,6 +67,8 @@ namespace YoutubeDL.Models
                 SQLiteDatabase.Escape(jsonYDL),
                 SQLiteDatabase.Escape(jsonRecord)
             ));
+
+            if (!begin_update) Commit();
         }
 
         internal DownloadVid GetVid(string vid)
@@ -76,6 +82,19 @@ namespace YoutubeDL.Models
         internal void DeleteVid(string vid)
         {
             db.ExecuteNonQuery(string.Format("DELETE FROM video WHERE vid = '{0}'", vid));
+        }
+
+        internal void BeginUpdate(){
+            begin_update = true;
+            script.Length = 0;
+        }
+        internal void Commit()
+        {
+            if(script.Length > 0)
+                db.ExecuteNonQuery(script.ToString());
+
+            begin_update = false;
+            script.Length = 0;
         }
     }
 }

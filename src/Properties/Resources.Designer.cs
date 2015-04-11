@@ -87,7 +87,7 @@ namespace YoutubeDL.Properties {
         ///    size = &apos;{13}&apos;,
         ///    jsonYDL = &apos;{14}&apos;,
         ///    jsonRecord = &apos;{15}&apos;
-        ///WHERE vid = &apos;{0}&apos;.
+        ///WHERE vid = &apos;{0}&apos;;.
         /// </summary>
         internal static string UPDATE {
             get {

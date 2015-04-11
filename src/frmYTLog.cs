@@ -27,7 +27,7 @@ namespace YoutubeDL
                 openForm.FormClosed += delegate { openForm = null; };
                 openForm.Show(parent);
             }
-            else openForm.BringToFront();
+            //else openForm.BringToFront();
 
             return openForm;
         }

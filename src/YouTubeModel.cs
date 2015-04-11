@@ -71,6 +71,12 @@ public class DownloadVid
     public string title { get; set; }
     public int status { get; set; }
     public string group { get; set; }
+
+    public DateTime date_add { get; set; }
+    public DateTime? date_format { get; set; }
+    public DateTime? date_merge { get; set; }
+    public bool fps60 { get; set; }
+
     public string jsonYDL { get; set; }
 
 }
