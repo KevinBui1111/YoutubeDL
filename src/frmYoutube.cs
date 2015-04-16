@@ -24,8 +24,11 @@ namespace YoutubeDL
         const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
 
         BackgroundWorker[] bws = new BackgroundWorker[4];
+        BackgroundWorker bwMerging;
         Queue<ListViewItem> queueItem = new Queue<ListViewItem>();
         int freeBW_number;
+        bool flag_cancelation;
+        IAsyncResult mergingResult;
 
         Color UNLOADED = Color.Gray;
         Color LOADED = Color.Black;
@@ -33,6 +36,8 @@ namespace YoutubeDL
         Color DOWNLOADING = Color.Crimson;
         Color COMPLETE = Color.Teal;
         Dictionary<int, Color> colorStatus;
+
+        Random rnd = new Random();
 
         public frmYoutube()
         {
@@ -47,6 +52,11 @@ namespace YoutubeDL
                 bws[i].RunWorkerCompleted += new RunWorkerCompletedEventHandler(download_vid_complete);
             }
             freeBW_number = bws.Length;
+
+            bwMerging = new BackgroundWorker();
+            bwMerging.WorkerSupportsCancellation = true;
+            bwMerging.DoWork += new DoWorkEventHandler(bwMerging_DoWork);
+            bwMerging.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwMerging_RunWorkerCompleted);
 
             ListViewHelper.EnableDoubleBuffer(lvDownload);
             ListViewHelper.EnableDoubleBuffer(lvVideo);
@@ -116,7 +126,9 @@ namespace YoutubeDL
             lvAudio.Items.Clear();
             
             if (lvDownload.SelectedItems.Count == 0) return;
-        
+
+            SetStatusSuccess(string.Format("{0}/{1} vids selected", lvDownload.SelectedItems.Count, lvDownload.Items.Count));
+
             currentLVItem = lvDownload.SelectedItems[0];
             var vid = (DownloadVid)currentLVItem.Tag;
             cbGroup.Text = vid.group;
@@ -258,27 +270,35 @@ namespace YoutubeDL
 
         private void btnLoadVid_Click(object sender, EventArgs e)
         {
-            if (freeBW_number == 0) return;
+            // check any worker is running
+            if (freeBW_number == 0)
+            {
+                flag_cancelation = true;
+                return;
+            }
 
+            // check connection
             if (!Helper.CheckForYoutubeConnection())
             {
                 SetStatusError("Can't connect to Youtube!");
                 return;
             }
 
-            IEnumerable<ListViewItem> itemParse;
-            if (lvDownload.SelectedItems.Count == 0)
-                itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
-                {
-                    var vid = (DownloadVid)i.Tag;
-                    return vid.status == 0;
-                });
-            else
-                itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
-
-            foreach (var item in itemParse)
+            // check any item remain in queue
+            if (queueItem.Count == 0)
             {
-                EnqueueItem(item);
+                IEnumerable<ListViewItem> itemParse;
+                if (lvDownload.SelectedItems.Count == 0)
+                    itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
+                    {
+                        var vid = (DownloadVid)i.Tag;
+                        return vid.status == 0;
+                    });
+                else
+                    itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+
+                foreach (var item in itemParse)
+                    EnqueueItem(item);
             }
 
             download_vid_format_In_Queue();
@@ -337,58 +357,15 @@ namespace YoutubeDL
         }
         private void btnMerge_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in lvDownload.Items)
+            if (bwMerging.IsBusy)
             {
-                var vid = (DownloadVid)item.Tag;
-                if (vid.status < 2) continue;
-
-                var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
-                var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
-                bool complete = vidFI.Exists && vidFI.Length == vid.vidSize &&
-                                audFI.Exists && audFI.Length == vid.audSize;
-
-                if (!complete) continue;
-
-                string desFolder = download_path
-                    + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
-                string desFilename = desFolder + "\\" + vid.filename;
-
-                if (!Directory.Exists(desFolder))
-                    Directory.CreateDirectory(desFolder);
-
-                var p = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = "ffmpeg",
-                        Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, desFilename),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardError = true,
-                        WorkingDirectory = download_path
-                    }
-                };
-
-                p.Start();
-                string error = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                int exitcode = p.ExitCode;
-                p.Close();
-
-                if (exitcode != 0 || File.Exists(desFilename) == false)
-                {
-                    var frmLog = frmYTLog.GetInstance(this);
-                    frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
-                }
-                else
-                {
-                    File.Delete(download_path + "\\" + vid.vidFilename);
-                    File.Delete(download_path + "\\" + vid.audFilename);
-                    vid.status = 4;
-                    vid.date_merge = DateTime.Now;
-                    UpdateLVItem(item, vid);
-                    repos.InsertOrUpdate(vid);
-                }
+                bwMerging.CancelAsync();
+            }
+            else
+            {
+                SetStatusError("Start merging video...");
+                bwMerging.RunWorkerAsync(lvDownload.Items.Cast<ListViewItem>().ToArray());
+                btnMerge.Text = "Stop";
             }
         }
         private void btnAutoSelect_Click(object sender, EventArgs e)
@@ -446,7 +423,11 @@ namespace YoutubeDL
         
         void download_vid_format_In_Queue()
         {
+            if (queueItem.Count == 0) return;
+
             SetStatusError("Start loading video...");
+            btnLoadVid.Text = "Stop";
+            flag_cancelation = false;
 
             for (int i = 0; i < bws.Length && queueItem.Count > 0; ++i)
                 download_next_vid(bws[i]);
@@ -459,6 +440,7 @@ namespace YoutubeDL
             var item = queueItem.Dequeue();
             item.BackColor = Color.LightBlue;
             item.SubItems["status"].Text = "running";
+            item.EnsureVisible();
 
             bw.RunWorkerAsync(new object[] { item, ((DownloadVid)item.Tag).vid });
         }
@@ -501,7 +483,7 @@ namespace YoutubeDL
 
             ++freeBW_number;
 
-            if (queueItem.Count > 0)
+            if (queueItem.Count > 0 && !flag_cancelation)
                 download_next_vid((BackgroundWorker)sender);
             else
                 backgroundworker_free();
@@ -509,12 +491,88 @@ namespace YoutubeDL
         private void backgroundworker_free()
         {
             if (freeBW_number == bws.Length)
+            {
                 SetStatusSuccess("Complete loading video.");
+                btnLoadVid.Text = "Load format";
+            }
         }
+        private void bwMerging_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            SetStatusSuccess("Merging video success.");
+            btnMerge.Text = "Merge";
+        }
+        private void bwMerging_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var bw = (BackgroundWorker)sender;
+
+            foreach (ListViewItem item in (ListViewItem[])e.Argument)
+            {
+                if (bw.CancellationPending) return;
+
+                this.Invoke((MethodInvoker)delegate { item.EnsureVisible(); });
+
+                item.BackColor = Color.LightBlue;
+
+                var vid = (DownloadVid)item.Tag;
+                if (vid.status < 2) continue;
+
+                var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
+                var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
+                bool complete = vidFI.Exists && vidFI.Length == vid.vidSize &&
+                                audFI.Exists && audFI.Length == vid.audSize;
+
+                if (!complete) continue;
+
+                string desFolder = download_path
+                    + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
+                string desFilename = desFolder + "\\" + vid.filename;
+
+                if (!Directory.Exists(desFolder))
+                    Directory.CreateDirectory(desFolder);
+
+                var p = new Process
+                {
+                    StartInfo =
+                    {
+                        FileName = "ffmpeg",
+                        Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, desFilename),
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardError = true,
+                        WorkingDirectory = download_path
+                    }
+                };
+
+                p.Start();
+                string error = p.StandardError.ReadToEnd();
+                p.WaitForExit();
+                int exitcode = p.ExitCode;
+                p.Close();
+
+                if (exitcode != 0 || File.Exists(desFilename) == false)
+                {
+                    var frmLog = frmYTLog.GetInstance(this);
+                    frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
+                }
+                else
+                {
+                    File.Delete(download_path + "\\" + vid.vidFilename);
+                    File.Delete(download_path + "\\" + vid.audFilename);
+                    vid.status = 4;
+                    vid.date_merge = DateTime.Now;
+                    UpdateLVItem(item, vid);
+                    repos.InsertOrUpdate(vid);
+                }
+
+                item.BackColor = Color.Transparent;
+            }
+
+        }
+
         
         YoutubeDlInfo LoadVideoInfo(string vidID)
         {
-            //System.Threading.Thread.Sleep(500);
+            //System.Threading.Thread.Sleep(rnd.Next(200, 1000));
             //return new YoutubeDlInfo { error = true };
 
             StringBuilder sb = new StringBuilder();
@@ -584,11 +642,10 @@ namespace YoutubeDL
                 repos.InsertOrUpdate(vid);
             }
         }
-
-        void BeginAsync(Action action, string beginText, string endText)
+        IAsyncResult BeginAsync(Action action, string beginText, string endText)
         {
             SetStatusError(beginText);
-            action.BeginInvoke(new AsyncCallback(CompleteAsyncCallback), endText);
+            return action.BeginInvoke(new AsyncCallback(CompleteAsyncCallback), endText);
         }
         void CompleteAsyncCallback(IAsyncResult result)
         {

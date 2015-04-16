@@ -72,8 +72,8 @@
             // 
             // lvVideo
             // 
-            this.lvVideo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.lvVideo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
             this.lvVideo.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colFID,
             this.colRes,
@@ -162,9 +162,9 @@
             // lvDownload
             // 
             this.lvDownload.AllowDrop = true;
-            this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colID,
             this.colStatus,
@@ -254,7 +254,7 @@
             this.btnLoadVid.Name = "btnLoadVid";
             this.btnLoadVid.Size = new System.Drawing.Size(87, 27);
             this.btnLoadVid.TabIndex = 0;
-            this.btnLoadVid.Text = "Parse thread";
+            this.btnLoadVid.Text = "Load format";
             this.btnLoadVid.UseVisualStyleBackColor = true;
             this.btnLoadVid.Click += new System.EventHandler(this.btnLoadVid_Click);
             // 
