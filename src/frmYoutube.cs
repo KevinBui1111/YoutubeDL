@@ -74,14 +74,11 @@ namespace YoutubeDL
             colorStatus.Add(4, COMPLETE);
 
             repos = new RepositoryLite();
-            var listVid = repos.LoadDownloadVideo();
-            foreach (var vid in listVid)
-                InsertVidtoLV(vid);
 
-            // load group list to combobox
-            cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
-
-            lbStatus.Text = string.Format("Total {0} vids.", listVid.Length);
+            // load channel list
+            cbChannel.Items.Add(new Channel { id = 0, name = "All" });
+            cbChannel.Items.AddRange(repos.Get_Channel_list());
+            cbChannel.SelectedIndex = 0;
         }
 
         private void lvVideo_Click(object sender, EventArgs e)
@@ -108,7 +105,7 @@ namespace YoutubeDL
 
             UpdateFormat(vid, vF, aF);
             UpdateLVItem(currentLVItem, vid);
-            repos.InsertOrUpdate(vid);
+            repos.UpdateFormat(vid);
         }
 
         private void lvDownload_KeyUp(object sender, KeyEventArgs e)
@@ -127,7 +124,13 @@ namespace YoutubeDL
             
             if (lvDownload.SelectedItems.Count == 0) return;
 
-            SetStatusSuccess(string.Format("{0}/{1} vids selected", lvDownload.SelectedItems.Count, lvDownload.Items.Count));
+            SetStatusSuccess(string.Format("{0}/{1} vids selected. Size {2}", lvDownload.SelectedItems.Count, lvDownload.Items.Count,
+                (lvDownload.SelectedItems
+                    .Cast<ListViewItem>()
+                    .Sum(item => ((DownloadVid)item.Tag).size)
+                    .Value * 1.0 / 1024 / 1024)
+                    .ToString("0.00") + " MB"
+                    ));
 
             currentLVItem = lvDownload.SelectedItems[0];
             var vid = (DownloadVid)currentLVItem.Tag;
@@ -185,6 +188,7 @@ namespace YoutubeDL
         {
             lvDownload.SelectedItems.Clear();
 
+            var channel = (Channel)cbChannel.SelectedItem;
             bool autoparse = ckAutoparse.Checked;
             string web_url = (string)e.Data.GetData(DataFormats.Text);
             string[] vidIDs = YoutubeDlInfo.GetVideoIDFromUrl(web_url);
@@ -192,9 +196,9 @@ namespace YoutubeDL
             {
                 if (lvDownload.Items.ContainsKey(id)) continue;
 
-                var vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, date_add = DateTime.Now };
+                var vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, channel_id = channel.id, date_add = DateTime.Now };
                 var item = InsertVidtoLV(vid);
-                repos.InsertOrUpdate(vid);
+                repos.Insert(vid);
 
                 if (autoparse)
                     EnqueueItem(item);
@@ -240,7 +244,7 @@ namespace YoutubeDL
             subitems["FID"].Text = string.IsNullOrEmpty(vid.vidFID) ? null : vid.vidFID + "+" + vid.audFID;
             subitems["resolution"].Text = vid.resolution;
             subitems["ext"].Text = vid.ext;
-            subitems["size"].Text = vid.size.HasValue ? (vid.size.Value * 1.0 / 1024 / 1024).ToString("0.00") + " MB" : null;
+            subitems["size"].Text = vid.size.ToReadableSize();
             subitems["title"].Text = vid.title;
             subitems["group"].Text = vid.group;
             subitems["dateformat"].Text = vid.date_format.ToHumanDate();
@@ -251,19 +255,21 @@ namespace YoutubeDL
         }
         void UpdateFormat(DownloadVid vid, Formats vF, Formats aF)
         {
-            vid.ext = vF.Ext;
-            vid.filename = new Regex(namePattern).Replace(vid.title, "_") + "." + vF.Ext;
             vid.vidFID = vF.Format_Id;
             vid.vidUrl = vF.Url;
             vid.vidFilename = string.Format(file_name_format, vid.vid, vid.vidFID, vF.Ext);
             if (vid.vid.StartsWith("-")) vid.vidFilename = "_" + vid.vidFilename;
             vid.vidSize = vF.FileSize;
+
             vid.audFID = aF.Format_Id;
             vid.audUrl = aF.Url;
             vid.audFilename = string.Format(file_name_format, vid.vid, vid.audFID, aF.Ext);
             if (vid.vid.StartsWith("-")) vid.audFilename = "_" + vid.audFilename;
             vid.audSize = aF.FileSize;
+
             vid.resolution = vF.Width + " x " + vF.Height;
+            vid.ext = vF.Ext;
+            vid.filename = new Regex(namePattern).Replace(vid.title, "_") + "." + vF.Ext;
             vid.size = vF.FileSize + aF.FileSize;
             vid.status = 2;
         }
@@ -350,7 +356,7 @@ namespace YoutubeDL
                 p.Close();
 
                 vid.status = 3;
-                repos.InsertOrUpdate(vid);
+                repos.UpdateStatus(vid);
                 UpdateLVItem(item, vid);
             }
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
@@ -405,7 +411,7 @@ namespace YoutubeDL
 
                 UpdateFormat(vid, vF, aF);
                 UpdateLVItem(item, vid);
-                repos.InsertOrUpdate(vid);
+                repos.UpdateFormat(vid);
             }
             lvDownload.EndUpdate();
 
@@ -477,7 +483,7 @@ namespace YoutubeDL
                 vid.jsonYDL = new JavaScriptSerializer().Serialize(vidInfo);
                 vid.date_format = DateTime.Now;
                 vid.fps60 = vidInfo.Formats.Exists(f => f.Fps > 30);
-                repos.InsertOrUpdate(vid);
+                repos.UpdateAfterLoading(vid);
                 UpdateLVItem(item, vid);
             }
 
@@ -509,19 +515,23 @@ namespace YoutubeDL
             {
                 if (bw.CancellationPending) return;
 
+                var vid = (DownloadVid)item.Tag;
+                if (vid.status != 3) continue;
+
                 this.Invoke((MethodInvoker)delegate { item.EnsureVisible(); });
 
                 item.BackColor = Color.LightBlue;
-
-                var vid = (DownloadVid)item.Tag;
-                if (vid.status < 2) continue;
 
                 var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
                 var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
                 bool complete = vidFI.Exists && vidFI.Length == vid.vidSize &&
                                 audFI.Exists && audFI.Length == vid.audSize;
 
-                if (!complete) continue;
+                if (!complete)
+                {
+                    item.BackColor = Color.Transparent;
+                    continue;
+                }
 
                 string desFolder = download_path
                     + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
@@ -561,7 +571,7 @@ namespace YoutubeDL
                     vid.status = 4;
                     vid.date_merge = DateTime.Now;
                     UpdateLVItem(item, vid);
-                    repos.InsertOrUpdate(vid);
+                    repos.UpdateAfterMerging(vid);
                 }
 
                 item.BackColor = Color.Transparent;
@@ -639,7 +649,7 @@ namespace YoutubeDL
                 var vid = (DownloadVid)item.Tag;
                 vid.group = group;
                 UpdateLVItem(item, vid);
-                repos.InsertOrUpdate(vid);
+                repos.UpdateGroup(vid);
             }
         }
         IAsyncResult BeginAsync(Action action, string beginText, string endText)
@@ -667,6 +677,33 @@ namespace YoutubeDL
         {
             lbStatus.BackColor = Color.DodgerBlue;
             lbStatus.Text = text;
+        }
+
+        private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var channel = (Channel)cbChannel.SelectedItem;
+            LoadVideoChannel(channel.id, null);
+
+            lvDownload.AllowDrop = channel.id > 0;
+        }
+
+        void LoadVideoChannel(int channel_id, string group)
+        {
+            lvDownload.BeginUpdate();
+
+            lvDownload.Items.Clear();
+            var listVid = repos.LoadDownloadVideo(channel_id, group);
+            foreach (var vid in listVid)
+                InsertVidtoLV(vid);
+
+            lvDownload.EndUpdate();
+
+            // load group list to combobox
+            cbGroup.Items.Clear();
+            cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+
+            lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
+                    .ToString("0.00") + " MB");
         }
     }
 }

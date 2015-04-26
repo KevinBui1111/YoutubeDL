@@ -121,6 +121,10 @@
     <value>INSERT INTO video (vid, vidFID,vidURL,vidFilename,vidSize,audFID,audURL,audFilename,audSize,resolution,ext,status,title,size,jsonYDL,jsonRecord)
 VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}','{13}','{14}','{15}');</value>
   </data>
+  <data name="INSERT_FORMAT" xml:space="preserve">
+    <value>INSERT INTO video (vid, [group], channel_id, date_add)
+VALUES({0}, {1}, {2}, {3});</value>
+  </data>
   <data name="UPDATE" xml:space="preserve">
     <value>UPDATE video 
 SET vidFID = '{1}',
@@ -139,5 +143,60 @@ SET vidFID = '{1}',
     jsonYDL = '{14}',
     jsonRecord = '{15}'
 WHERE vid = '{0}';</value>
+  </data>
+  <data name="UPDATE_AFTERLOADING" xml:space="preserve">
+    <value>UPDATE video 
+SET status = {1}
+    ,title = {2}    
+    ,fps60 = {3}    
+    ,date_format = {4}    
+    ,jsonYDL = {5}
+WHERE vid = {0};</value>
+  </data>
+  <data name="UPDATE_FORMAT" xml:space="preserve">
+    <value>UPDATE video 
+SET vidFID = {1},
+    vidURL = {2},
+    vidFilename = {3},    
+    vidSize = {4},    
+
+    audFID = {5},
+    audURL = {6},
+    audFilename = {7},
+    audSize = {8},    
+
+    resolution = {9},
+    ext = {10},
+    filename = {11},
+    size = {12},
+    status = {13}
+WHERE vid = {0};</value>
+  </data>
+  <data name="UPDATE_GROUP" xml:space="preserve">
+    <value>UPDATE video 
+SET group = {1}
+    ,channel_id = {2}
+WHERE vid = {0};</value>
+  </data>
+  <data name="UPDATE_MERGING" xml:space="preserve">
+    <value>UPDATE video 
+SET status = {1}
+    ,date_merge = {2}
+WHERE vid = {0};</value>
+  </data>
+  <data name="UPDATE_NEWFIELD" xml:space="preserve">
+    <value>UPDATE video 
+SET filename = {1},
+    [group] = {2},
+    fps60 = {3},
+    date_add = {4},
+    date_format = {5},
+    date_merge = {6}
+WHERE vid = {0};</value>
+  </data>
+  <data name="UPDATE_STATUS" xml:space="preserve">
+    <value>UPDATE video 
+SET status = {1}
+WHERE vid = {0};</value>
   </data>
 </root>

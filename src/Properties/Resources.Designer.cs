@@ -71,6 +71,16 @@ namespace YoutubeDL.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to INSERT INTO video (vid, [group], channel_id, date_add)
+        ///VALUES({0}, {1}, {2}, {3});.
+        /// </summary>
+        internal static string INSERT_FORMAT {
+            get {
+                return ResourceManager.GetString("INSERT_FORMAT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UPDATE video 
         ///SET vidFID = &apos;{1}&apos;,
         ///    vidURL = &apos;{2}&apos;,
@@ -92,6 +102,97 @@ namespace YoutubeDL.Properties {
         internal static string UPDATE {
             get {
                 return ResourceManager.GetString("UPDATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET status = {1}
+        ///    ,title = {2}    
+        ///    ,fps60 = {3}    
+        ///    ,date_format = {4}    
+        ///    ,jsonYDL = {5}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_AFTERLOADING {
+            get {
+                return ResourceManager.GetString("UPDATE_AFTERLOADING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET vidFID = {1},
+        ///    vidURL = {2},
+        ///    vidFilename = {3},    
+        ///    vidSize = {4},    
+        ///
+        ///    audFID = {5},
+        ///    audURL = {6},
+        ///    audFilename = {7},
+        ///    audSize = {8},    
+        ///
+        ///    resolution = {9},
+        ///    ext = {10},
+        ///    filename = {11},
+        ///    size = {12},
+        ///    status = {13}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_FORMAT {
+            get {
+                return ResourceManager.GetString("UPDATE_FORMAT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET group = {1}
+        ///    ,channel_id = {2}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_GROUP {
+            get {
+                return ResourceManager.GetString("UPDATE_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET status = {1}
+        ///    ,date_merge = {2}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_MERGING {
+            get {
+                return ResourceManager.GetString("UPDATE_MERGING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET filename = {1},
+        ///    [group] = {2},
+        ///    fps60 = {3},
+        ///    date_add = {4},
+        ///    date_format = {5},
+        ///    date_merge = {6}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_NEWFIELD {
+            get {
+                return ResourceManager.GetString("UPDATE_NEWFIELD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UPDATE video 
+        ///SET status = {1}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_STATUS {
+            get {
+                return ResourceManager.GetString("UPDATE_STATUS", resourceCulture);
             }
         }
     }

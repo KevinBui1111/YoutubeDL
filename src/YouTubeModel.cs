@@ -71,6 +71,7 @@ public class DownloadVid
     public string title { get; set; }
     public int status { get; set; }
     public string group { get; set; }
+    public int channel_id { get; set; }
 
     public DateTime date_add { get; set; }
     public DateTime? date_format { get; set; }
@@ -79,4 +80,15 @@ public class DownloadVid
 
     public string jsonYDL { get; set; }
 
+}
+
+public class Channel{
+    public int id { get; set; }
+    public string ytchannel_id { get; set; }
+    public string name { get; set; }
+
+    public override string ToString()
+    {
+        return string.Format("{0} - {1}", id, name);
+    }
 }

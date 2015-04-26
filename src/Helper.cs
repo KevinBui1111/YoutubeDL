@@ -91,6 +91,41 @@ namespace YoutubeDL
 
             return string.Format("{0} years ago", now.Year - d.Year);
         }
+        public static long ToUnixTime(this DateTime date)
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return Convert.ToInt64((date.ToUniversalTime() - epoch).TotalSeconds);
+        }
+        public static long? ToUnixTime(this DateTime? date)
+        {
+            if (date == null) return null;
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return Convert.ToInt64((date.Value.ToUniversalTime() - epoch).TotalSeconds);
+        }
+        public static DateTime FromUnixTime(this long unixTime)
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            return epoch.AddSeconds(unixTime).ToLocalTime();
+        }
+        public static string ToReadableSize(this long? size)
+        {
+            if (size == null) return null;
+
+            const long ONE_GB = 1024 * 1024 * 1024;
+            const long ONE_MB = 1024 * 1024;
+            const long ONE_KB = 1024;
+
+            if (size < ONE_KB)
+                return string.Format("{0} Bytes", size);
+
+            if (size < ONE_MB)
+                return string.Format("{0} KB", size / ONE_KB);
+
+            if (size < ONE_GB)
+                return string.Format("{0} MB", size / ONE_MB);
+
+            return string.Format("{0:0.##} GB", 1f * size / ONE_GB);
+        }
     }
     public class Helper
     {
