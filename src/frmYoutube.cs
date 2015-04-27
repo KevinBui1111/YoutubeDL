@@ -721,5 +721,49 @@ namespace YoutubeDL
                 
             }
         }
+
+        private void btnCheckFormat_Click(object sender, EventArgs e)
+        {
+            IEnumerable<ListViewItem> itemParse;
+            if (lvDownload.SelectedItems.Count == 0)
+                itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
+                {
+                    var vid = (DownloadVid)i.Tag;
+                    return vid.status >= 1;
+                });
+            else
+                itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+
+            List<ListViewItem> errorItem = new List<ListViewItem>();
+
+            foreach (var item in itemParse)
+            {
+                var vid = (DownloadVid)item.Tag;
+
+                var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(vid.jsonYDL);
+                var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
+                var audFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue).OrderByDescending(f => f.FileSize);
+
+                foreach (Formats f in vidFormats)
+                {
+                    if (f.Width == null || f.Height == null || f.Fps == null || f.FileSize == null){
+                        errorItem.Add(item);
+                        break;
+                    }
+                }
+            }
+
+            if (errorItem.Count == 0)
+                MessageBox.Show("All items are proper.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            else if (MessageBox.Show(string.Format("Following item has corrupt format: {0}\n\nDo you want to reload format for them?", string.Join(", ", errorItem.Select(it => ((DownloadVid)it.Tag).vid).ToArray())), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+                == DialogResult.Yes)
+            {
+                queueItem.Clear();
+                foreach (var item in errorItem)
+                    EnqueueItem(item);
+
+                download_vid_format_In_Queue();
+            }
+        }
     }
 }

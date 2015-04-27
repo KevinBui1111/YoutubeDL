@@ -62,6 +62,7 @@
             this.txtPath = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnChangePath = new System.Windows.Forms.Button();
+            this.btnCheckFormat = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnParse
@@ -275,7 +276,7 @@
             // ckAutoparse
             // 
             this.ckAutoparse.AutoSize = true;
-            this.ckAutoparse.Location = new System.Drawing.Point(214, 45);
+            this.ckAutoparse.Location = new System.Drawing.Point(214, 73);
             this.ckAutoparse.Name = "ckAutoparse";
             this.ckAutoparse.Size = new System.Drawing.Size(83, 19);
             this.ckAutoparse.TabIndex = 2;
@@ -354,11 +355,22 @@
             this.btnChangePath.UseVisualStyleBackColor = true;
             this.btnChangePath.Click += new System.EventHandler(this.btnChangePath_Click);
             // 
+            // btnCheckFormat
+            // 
+            this.btnCheckFormat.Location = new System.Drawing.Point(201, 45);
+            this.btnCheckFormat.Name = "btnCheckFormat";
+            this.btnCheckFormat.Size = new System.Drawing.Size(96, 27);
+            this.btnCheckFormat.TabIndex = 10;
+            this.btnCheckFormat.Text = "Check format";
+            this.btnCheckFormat.UseVisualStyleBackColor = true;
+            this.btnCheckFormat.Click += new System.EventHandler(this.btnCheckFormat_Click);
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(681, 461);
+            this.Controls.Add(this.btnCheckFormat);
             this.Controls.Add(this.btnChangePath);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtPath);
@@ -419,5 +431,6 @@
         private System.Windows.Forms.TextBox txtPath;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnChangePath;
+        private System.Windows.Forms.Button btnCheckFormat;
     }
 }
