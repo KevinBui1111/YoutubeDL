@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YoutubeDL.Models;
+using YoutubeDL.Properties;
 
 namespace YoutubeDL
 {
@@ -19,7 +20,7 @@ namespace YoutubeDL
         const string YoutubeLink = "https://www.youtube.com/watch?v=";
         RepositoryLite repos;
         ListViewItem currentLVItem;
-        string download_path = @"F:\Downloads\Video\YDL";
+        string download_path = (string)Settings.Default["DownloadPath"];
         const string file_name_format = "{0}_{1}.{2}";
         const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
 
@@ -79,6 +80,8 @@ namespace YoutubeDL
             cbChannel.Items.Add(new Channel { id = 0, name = "All" });
             cbChannel.Items.AddRange(repos.Get_Channel_list());
             cbChannel.SelectedIndex = 0;
+
+            txtPath.Text = download_path;
         }
 
         private void lvVideo_Click(object sender, EventArgs e)
@@ -704,6 +707,19 @@ namespace YoutubeDL
 
             lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
                     .ToString("0.00") + " MB");
+        }
+
+        private void btnChangePath_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+            dlg.SelectedPath = download_path;
+            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Settings.Default["DownloadPath"] = dlg.SelectedPath = 
+                    txtPath.Text = dlg.SelectedPath;
+                Settings.Default.Save();
+                
+            }
         }
     }
 }

@@ -59,6 +59,9 @@
             this.btnAutoSelect = new System.Windows.Forms.Button();
             this.lbStatus = new System.Windows.Forms.Label();
             this.cbChannel = new System.Windows.Forms.ComboBox();
+            this.txtPath = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.btnChangePath = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnParse
@@ -84,10 +87,10 @@
             this.lvVideo.FullRowSelect = true;
             this.lvVideo.GridLines = true;
             this.lvVideo.HideSelection = false;
-            this.lvVideo.Location = new System.Drawing.Point(12, 166);
+            this.lvVideo.Location = new System.Drawing.Point(12, 129);
             this.lvVideo.MultiSelect = false;
             this.lvVideo.Name = "lvVideo";
-            this.lvVideo.Size = new System.Drawing.Size(285, 262);
+            this.lvVideo.Size = new System.Drawing.Size(285, 299);
             this.lvVideo.TabIndex = 1;
             this.lvVideo.UseCompatibleStateImageBehavior = false;
             this.lvVideo.View = System.Windows.Forms.View.Details;
@@ -131,7 +134,7 @@
             this.lvAudio.FullRowSelect = true;
             this.lvAudio.GridLines = true;
             this.lvAudio.HideSelection = false;
-            this.lvAudio.Location = new System.Drawing.Point(12, 72);
+            this.lvAudio.Location = new System.Drawing.Point(12, 166);
             this.lvAudio.MultiSelect = false;
             this.lvAudio.Name = "lvAudio";
             this.lvAudio.Size = new System.Drawing.Size(285, 88);
@@ -322,23 +325,55 @@
             this.cbChannel.TabIndex = 6;
             this.cbChannel.SelectedIndexChanged += new System.EventHandler(this.cbChannel_SelectedIndexChanged);
             // 
+            // txtPath
+            // 
+            this.txtPath.Location = new System.Drawing.Point(12, 100);
+            this.txtPath.Name = "txtPath";
+            this.txtPath.ReadOnly = true;
+            this.txtPath.Size = new System.Drawing.Size(253, 23);
+            this.txtPath.TabIndex = 7;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 82);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(88, 15);
+            this.label1.TabIndex = 8;
+            this.label1.Text = "Download Path";
+            // 
+            // btnChangePath
+            // 
+            this.btnChangePath.AutoSize = true;
+            this.btnChangePath.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnChangePath.Location = new System.Drawing.Point(271, 98);
+            this.btnChangePath.Name = "btnChangePath";
+            this.btnChangePath.Size = new System.Drawing.Size(26, 25);
+            this.btnChangePath.TabIndex = 9;
+            this.btnChangePath.Text = "...";
+            this.btnChangePath.UseVisualStyleBackColor = true;
+            this.btnChangePath.Click += new System.EventHandler(this.btnChangePath_Click);
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(681, 461);
+            this.Controls.Add(this.btnChangePath);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtPath);
             this.Controls.Add(this.cbChannel);
             this.Controls.Add(this.lbStatus);
             this.Controls.Add(this.btnAutoSelect);
             this.Controls.Add(this.cbGroup);
             this.Controls.Add(this.ckAutoparse);
             this.Controls.Add(this.lvDownload);
-            this.Controls.Add(this.lvAudio);
             this.Controls.Add(this.lvVideo);
             this.Controls.Add(this.btnClick);
             this.Controls.Add(this.btnMerge);
             this.Controls.Add(this.btnLoadVid);
             this.Controls.Add(this.btnParse);
+            this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
             this.Text = "YoutubeDL";
@@ -381,5 +416,8 @@
         private System.Windows.Forms.ColumnHeader col60fps;
         private System.Windows.Forms.Label lbStatus;
         private System.Windows.Forms.ComboBox cbChannel;
+        private System.Windows.Forms.TextBox txtPath;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnChangePath;
     }
 }
