@@ -573,7 +573,7 @@ namespace YoutubeDL
                     File.Delete(download_path + "\\" + vid.audFilename);
                     vid.status = 4;
                     vid.date_merge = DateTime.Now;
-                    UpdateLVItem(item, vid);
+                    this.Invoke((MethodInvoker)delegate { UpdateLVItem(item, vid); });
                     repos.UpdateAfterMerging(vid);
                 }
 
