@@ -147,7 +147,7 @@ namespace YoutubeDL.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to UPDATE video 
-        ///SET group = {1}
+        ///SET [group] = {1}
         ///    ,channel_id = {2}
         ///WHERE vid = {0};.
         /// </summary>

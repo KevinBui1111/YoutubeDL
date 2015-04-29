@@ -205,7 +205,7 @@ namespace YoutubeDL.Models
         }
         internal void UpdateGroup(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_AFTERLOADING,
+            script.AppendLine(string.Format(Resources.UPDATE_GROUP,
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.group),

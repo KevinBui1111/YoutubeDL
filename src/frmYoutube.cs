@@ -702,8 +702,11 @@ namespace YoutubeDL
             lvDownload.EndUpdate();
 
             // load group list to combobox
-            cbGroup.Items.Clear();
-            cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+            if (channel_id == 0)
+            {
+                cbGroup.Items.Clear();
+                cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+            }
 
             lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
                     .ToString("0.00") + " MB");
