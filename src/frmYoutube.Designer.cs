@@ -63,6 +63,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.btnChangePath = new System.Windows.Forms.Button();
             this.btnCheckFormat = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnParse
@@ -365,11 +366,22 @@
             this.btnCheckFormat.UseVisualStyleBackColor = true;
             this.btnCheckFormat.Click += new System.EventHandler(this.btnCheckFormat_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(99, 44);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(96, 27);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "Video Manager";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.btnRecheck_Click);
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(681, 461);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnCheckFormat);
             this.Controls.Add(this.btnChangePath);
             this.Controls.Add(this.label1);
@@ -432,5 +444,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnChangePath;
         private System.Windows.Forms.Button btnCheckFormat;
+        private System.Windows.Forms.Button button1;
     }
 }

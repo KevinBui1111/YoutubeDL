@@ -107,7 +107,8 @@ namespace YoutubeDL.Models
             {
                 id = Convert.ToInt32(r["id"]),
                 ytchannel_id = (string)r["ytchannel_id"],
-                name = (string)r["name"]
+                name = (string)r["name"],
+                folder = (string)r["folder"]
             }).ToArray();
         }
 
@@ -235,7 +236,7 @@ namespace YoutubeDL.Models
         {
             var jsSer = new JavaScriptSerializer();
             DataTable dt = db.GetDataTable(
-                string.Format("select * from video where ({0} = 0 OR channel_id = {0}) AND ('{1}' = '' OR [group] = '{1}')", channel_id, group)
+                string.Format("select * from video where ({0} = 0 OR channel_id = {0}) AND ('{1}' = '' OR [group] = '{1}') AND status >= 0", channel_id, SQLiteDatabase.Escape(group))
                 );
             return dt.AsEnumerable().Select(r => new DownloadVid
             {

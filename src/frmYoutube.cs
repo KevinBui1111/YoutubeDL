@@ -718,10 +718,8 @@ namespace YoutubeDL
             dlg.SelectedPath = download_path;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.Default["DownloadPath"] = dlg.SelectedPath = 
-                    txtPath.Text = dlg.SelectedPath;
+                Settings.Default["DownloadPath"] = txtPath.Text = download_path = dlg.SelectedPath;
                 Settings.Default.Save();
-                
             }
         }
 
@@ -767,6 +765,12 @@ namespace YoutubeDL
 
                 download_vid_format_In_Queue();
             }
+        }
+
+        private void btnRecheck_Click(object sender, EventArgs e)
+        {
+            frmManageVideo frm = new frmManageVideo();
+            frm.ShowDialog();
         }
     }
 }

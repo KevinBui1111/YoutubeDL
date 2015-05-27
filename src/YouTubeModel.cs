@@ -86,6 +86,7 @@ public class Channel{
     public int id { get; set; }
     public string ytchannel_id { get; set; }
     public string name { get; set; }
+    public string folder { get; set; }
 
     public override string ToString()
     {
