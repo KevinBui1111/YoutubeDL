@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.FileIO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -146,10 +147,16 @@ namespace YoutubeDL
                 var currentLVItem = lvDownload.SelectedItems[0];
                 var vid = (DownloadVid)currentLVItem.Tag;
 
-                vid.status = -1;
-                repos.UpdateStatus(vid);
+                FileSystem.DeleteFile(getFullfilename(vid), UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
 
-                currentLVItem.Remove();
+                if (!File.Exists(getFullfilename(vid)))
+                {
+                    vid.status = -1;
+                    repos.UpdateStatus(vid);
+
+                    currentLVItem.Remove();
+                }
+
             }
         }
 
