@@ -271,5 +271,20 @@ namespace YoutubeDL.Models
                 jsonYDL = r["jsonYDL"] is DBNull ? null : (string)r["jsonYDL"],
             }).ToArray();
         }
+        internal DownloadVid[] LoadDeletedVideo()
+        {
+            var jsSer = new JavaScriptSerializer();
+            DataTable dt = db.GetDataTable(
+                string.Format("select vid,filename,[group],channel_id from video where status = -1")
+                );
+            return dt.AsEnumerable().Select(r => new DownloadVid
+            {
+                vid = (string)r["vid"],
+
+                filename = r["filename"] is DBNull ? null : (string)r["filename"],
+                group = r["group"] is DBNull ? null : (string)r["group"],
+                channel_id = r["channel_id"] is DBNull ? 0 : Convert.ToInt32(r["channel_id"]),
+            }).ToArray();
+        }
     }
 }

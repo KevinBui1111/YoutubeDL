@@ -31,6 +31,7 @@ namespace YoutubeDL
         bool flag_cancelation;
         IAsyncResult mergingResult;
 
+        Color DELETED = Color.DarkGray;
         Color UNLOADED = Color.Gray;
         Color LOADED = Color.Black;
         Color FORMATTED = Color.RoyalBlue;
@@ -68,6 +69,7 @@ namespace YoutubeDL
             col60fps.DisplayIndex = 6;
 
             colorStatus = new Dictionary<int,Color>();
+            colorStatus.Add(-1, DELETED);
             colorStatus.Add(0, UNLOADED);
             colorStatus.Add(1, LOADED);
             colorStatus.Add(2, FORMATTED);
@@ -767,10 +769,10 @@ namespace YoutubeDL
             }
         }
 
-        private void btnRecheck_Click(object sender, EventArgs e)
+        private void btnVidMan_Click(object sender, EventArgs e)
         {
             frmManageVideo frm = new frmManageVideo();
-            frm.ShowDialog();
+            frm.Show();
         }
     }
 }

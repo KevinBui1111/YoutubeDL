@@ -104,6 +104,8 @@ namespace YoutubeDL
 
             if (!File.Exists(getFullfilename(vid)))
                 item.ForeColor = Color.Red;
+            else if (vid.status == -1)
+                item.ForeColor = Color.RoyalBlue;
 
             item.Text = item.Name = vid.filename;
             item.Tag = vid;
@@ -156,7 +158,6 @@ namespace YoutubeDL
 
                     currentLVItem.Remove();
                 }
-
             }
         }
 
@@ -188,6 +189,25 @@ namespace YoutubeDL
             }
 
             lvDownload.EndUpdate();
+        }
+
+        private void btnWrongDel_Click(object sender, EventArgs e)
+        {
+            var deletedVids = repos.LoadDeletedVideo();
+            List<string> wrongdel = new List<string>();
+            foreach (var vid in deletedVids)
+            {
+                if(File.Exists(getFullfilename(vid)))
+                {
+                    vid.status = 4;
+                    repos.UpdateStatus(vid);
+
+                    wrongdel.Add(vid.vid);
+                }
+            }
+
+            MessageBox.Show(string.Format("Restore successfully {0} videos: {1}",
+                wrongdel.Count, string.Join(", ", wrongdel.ToArray())));
         }
 
     }

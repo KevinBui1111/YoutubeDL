@@ -39,6 +39,7 @@
             this.cbGroup = new System.Windows.Forms.ComboBox();
             this.btnRemoveMissing = new System.Windows.Forms.Button();
             this.lbStatus = new System.Windows.Forms.Label();
+            this.btnWrongDel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // lvDownload
@@ -140,11 +141,22 @@
             this.lbStatus.TabIndex = 10;
             this.lbStatus.Text = "label1";
             // 
+            // btnWrongDel
+            // 
+            this.btnWrongDel.Location = new System.Drawing.Point(367, 10);
+            this.btnWrongDel.Name = "btnWrongDel";
+            this.btnWrongDel.Size = new System.Drawing.Size(108, 25);
+            this.btnWrongDel.TabIndex = 11;
+            this.btnWrongDel.Text = "Wrong deletion";
+            this.btnWrongDel.UseVisualStyleBackColor = true;
+            this.btnWrongDel.Click += new System.EventHandler(this.btnWrongDel_Click);
+            // 
             // frmManageVideo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(487, 302);
+            this.Controls.Add(this.btnWrongDel);
             this.Controls.Add(this.lbStatus);
             this.Controls.Add(this.btnRemoveMissing);
             this.Controls.Add(this.cbChannel);
@@ -172,5 +184,6 @@
         private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.Button btnRemoveMissing;
         private System.Windows.Forms.Label lbStatus;
+        private System.Windows.Forms.Button btnWrongDel;
     }
 }
