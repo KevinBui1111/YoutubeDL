@@ -52,6 +52,7 @@ namespace YoutubeDL
             if (reloadGroup)
             {
                 cbGroup.Items.Clear();
+                cbGroup.Items.Add("zOthers");
                 cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
             }
 
@@ -138,8 +139,13 @@ namespace YoutubeDL
 
         string getFullfilename(DownloadVid vid)
         {
-            return string.Format(@"{0}{1}\{2}\{3}", 
-                vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
+            if (string.IsNullOrEmpty(vid.group))
+                return string.Format(@"{0}{1}\{2}",
+                    vidFolder, dicChannel[vid.channel_id].folder, vid.filename);
+            else
+                return string.Format(@"{0}{1}\{2}\{3}", 
+                    vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
+
         }
 
         private void lvDownload_KeyUp(object sender, KeyEventArgs e)
