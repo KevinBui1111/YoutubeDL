@@ -71,8 +71,8 @@ namespace YoutubeDL.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to INSERT INTO video (vid, [group], channel_id, date_add)
-        ///VALUES({0}, {1}, {2}, {3});.
+        ///   Looks up a localized string similar to INSERT INTO video (vid, [group], channel_id, status, date_add)
+        ///VALUES({0}, {1}, {2}, 0, {3});.
         /// </summary>
         internal static string INSERT_FORMAT {
             get {
