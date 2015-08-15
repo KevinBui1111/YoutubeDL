@@ -28,6 +28,7 @@ namespace YoutubeDL
         BackgroundWorker bwMerging;
         Queue<ListViewItem> queueItem = new Queue<ListViewItem>();
         int freeBW_number;
+        int num_thread;
         bool flag_cancelation;
         IAsyncResult mergingResult;
 
@@ -53,7 +54,7 @@ namespace YoutubeDL
                 bws[i].DoWork += new DoWorkEventHandler(download_vid_work);
                 bws[i].RunWorkerCompleted += new RunWorkerCompletedEventHandler(download_vid_complete);
             }
-            freeBW_number = bws.Length;
+            freeBW_number = num_thread = bws.Length;
 
             bwMerging = new BackgroundWorker();
             bwMerging.WorkerSupportsCancellation = true;
@@ -150,14 +151,18 @@ namespace YoutubeDL
             var listitem = new List<ListViewItem>();
             foreach (Formats f in vidFormats)
             {
-                ListViewItem item = new ListViewItem(new string[]{
-                    f.Format_Id, f.Width + " x " + f.Height, f.Ext, f.Fps > 30 ? f.Fps.ToString() : null, (1.0 * f.FileSize / 1024 / 1024).Value.ToString("0.00") + " MB"
-                });
-                item.Name = f.Format_Id;
-                item.Tag = f;
-                item.Selected = vid.vidFID == f.Format_Id;
+                try
+                {
+                    ListViewItem item = new ListViewItem(new string[]{
+                        f.Format_Id, f.Width + " x " + f.Height, f.Ext, f.Fps > 30 ? f.Fps.ToString() : null, (1.0 * f.FileSize / 1024 / 1024).Value.ToString("0.00") + " MB"
+                    });
+                    item.Name = f.Format_Id;
+                    item.Tag = f;
+                    item.Selected = vid.vidFID == f.Format_Id;
 
-                listitem.Add(item);
+                    listitem.Add(item);
+                }
+                catch { }
             }
 
             lvVideo.Items.AddRange(listitem.ToArray());
@@ -395,6 +400,7 @@ namespace YoutubeDL
 
             repos.BeginUpdate();
             lvDownload.BeginUpdate();
+            List<ListViewItem> errorItem = new List<ListViewItem>();
             foreach (ListViewItem item in itemParse)
             {
                 var vid = (DownloadVid)item.Tag;
@@ -412,15 +418,31 @@ namespace YoutubeDL
                 else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
                 else vF = maxMp4;
 
-                var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).First(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
-
-                UpdateFormat(vid, vF, aF);
-                UpdateLVItem(item, vid);
-                repos.UpdateFormat(vid);
+                var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
+                if (aF == null)
+                    errorItem.Add(item);
+                else
+                {
+                    UpdateFormat(vid, vF, aF);
+                    UpdateLVItem(item, vid);
+                    repos.UpdateFormat(vid);
+                }
             }
             lvDownload.EndUpdate();
+            repos.Commit();
+            //BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
 
-            BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
+            if (errorItem.Count != 0
+                && MessageBox.Show(string.Format("Following item has corrupt format: {0}\n\nDo you want to reload format for them?", string.Join(", ", errorItem.Select(it => ((DownloadVid)it.Tag).vid).ToArray())), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+                == DialogResult.Yes)
+            {
+                queueItem.Clear();
+                foreach (var item in errorItem)
+                    EnqueueItem(item);
+
+                download_vid_format_In_Queue(true);
+            }
+
         }
         private void cbGroup_KeyDown(object sender, KeyEventArgs e)
         {
@@ -432,7 +454,7 @@ namespace YoutubeDL
             }
         }
         
-        void download_vid_format_In_Queue()
+        void download_vid_format_In_Queue(bool single_thread = false)
         {
             if (queueItem.Count == 0) return;
 
@@ -440,7 +462,8 @@ namespace YoutubeDL
             btnLoadVid.Text = "Stop";
             flag_cancelation = false;
 
-            for (int i = 0; i < bws.Length && queueItem.Count > 0; ++i)
+            num_thread = freeBW_number = single_thread ? 1 : bws.Length;
+            for (int i = 0; i < num_thread && queueItem.Count > 0; ++i)
                 download_next_vid(bws[i]);
         }
         void download_next_vid(BackgroundWorker bw)
@@ -501,7 +524,7 @@ namespace YoutubeDL
         }
         private void backgroundworker_free()
         {
-            if (freeBW_number == bws.Length)
+            if (freeBW_number == num_thread)
             {
                 SetStatusSuccess("Complete loading video.");
                 btnLoadVid.Text = "Load format";
@@ -738,22 +761,30 @@ namespace YoutubeDL
                 itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
 
             List<ListViewItem> errorItem = new List<ListViewItem>();
+            //List<string> errorFormat = new List<string>();
 
             foreach (var item in itemParse)
             {
+                bool res = true;
                 var vid = (DownloadVid)item.Tag;
 
                 var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(vid.jsonYDL);
                 var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
-                var audFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue).OrderByDescending(f => f.FileSize);
 
                 foreach (Formats f in vidFormats)
                 {
                     if (f.Width == null || f.Height == null || f.Fps == null || f.FileSize == null){
                         errorItem.Add(item);
+                        //errorFormat.Add(f.Format_Id);
+                        res = false;
                         break;
                     }
                 }
+
+                if (!res) continue;
+
+                if(vidInfo.Formats.Any(f => f.Format_Note == "DASH audio" && f.FileSize == null))
+                    errorItem.Add(item);
             }
 
             if (errorItem.Count == 0)
@@ -765,8 +796,10 @@ namespace YoutubeDL
                 foreach (var item in errorItem)
                     EnqueueItem(item);
 
-                download_vid_format_In_Queue();
+                download_vid_format_In_Queue(true);
             }
+
+            //Clipboard.SetText(string.Join(", ", errorFormat.Distinct().ToArray()));
         }
 
         private void btnVidMan_Click(object sender, EventArgs e)
