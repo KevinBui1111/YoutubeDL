@@ -232,11 +232,16 @@ namespace YoutubeDL.Models
             if (!begin_update) Commit();
         }
 
-        internal DownloadVid[] LoadDownloadVideo(int channel_id, string group)
+        internal DownloadVid[] LoadDownloadVideo(int channel_id, string group, bool showCompleted)
         {
             var jsSer = new JavaScriptSerializer();
             DataTable dt = db.GetDataTable(
-                string.Format("select * from video where ({0} = 0 OR channel_id = {0}) AND ('{1}' = '' OR [group] = '{1}' OR ('{1}' = 'zOthers' AND [group] = '')) AND status >= 0", channel_id, SQLiteDatabase.Escape(group))
+                string.Format("select * " +
+                              "from video " +
+                              "where ({0} = 0 OR channel_id = {0}) " + 
+                                    "AND ('{1}' = '' OR [group] = '{1}' OR ('{1}' = 'zOthers' AND [group] = '')) " +
+                                    (showCompleted ? "AND status = 4 " : "AND status >= 0"),
+                            channel_id, SQLiteDatabase.Escape(group))
                 );
             return dt.AsEnumerable().Select(r => new DownloadVid
             {

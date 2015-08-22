@@ -30,7 +30,6 @@ namespace YoutubeDL
         int freeBW_number;
         int num_thread;
         bool flag_cancelation;
-        IAsyncResult mergingResult;
 
         Color DELETED = Color.DarkGray;
         Color UNLOADED = Color.Gray;
@@ -720,7 +719,7 @@ namespace YoutubeDL
             lvDownload.BeginUpdate();
 
             lvDownload.Items.Clear();
-            var listVid = repos.LoadDownloadVideo(channel_id, group);
+            var listVid = repos.LoadDownloadVideo(channel_id, group, false);
             foreach (var vid in listVid)
                 InsertVidtoLV(vid);
 

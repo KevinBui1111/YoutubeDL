@@ -16,6 +16,7 @@ namespace YoutubeDL
     public partial class frmManageVideo : Form
     {
         RepositoryLite repos = new RepositoryLite();
+        int new_channel_id;
 
         public frmManageVideo()
         {
@@ -39,10 +40,12 @@ namespace YoutubeDL
 
         void LoadVideoChannel(int channel_id, string group, bool reloadGroup = false)
         {
+            new_channel_id = ((Channel)cbColornew.SelectedItem).id;
+
             lvDownload.BeginUpdate();
 
             lvDownload.Items.Clear();
-            var listVid = repos.LoadDownloadVideo(channel_id, group).OrderBy(v => v.filename);
+            var listVid = repos.LoadDownloadVideo(channel_id, group, ckCompletedVideo.Checked).OrderBy(v => v.filename);
             foreach (var vid in listVid)
                 InsertVidtoLV(vid);
 
@@ -66,6 +69,10 @@ namespace YoutubeDL
 
             var channels = repos.Get_Channel_list();
             dicChannel = channels.ToDictionary(s => s.id);
+
+            cbColornew.Items.Add(new Channel { id = 0, name = "All" });
+            cbColornew.Items.AddRange(channels);
+            cbColornew.SelectedIndex = 0;
 
             cbChannel.Items.Add(new Channel { id = 0, name = "All" });
             cbChannel.Items.AddRange(channels);
@@ -105,7 +112,7 @@ namespace YoutubeDL
 
             if (!File.Exists(getFullfilename(vid)))
                 item.ForeColor = Color.Red;
-            else if (vid.status == -1)
+            else if (new_channel_id > 0 && vid.channel_id >= new_channel_id)
                 item.ForeColor = Color.RoyalBlue;
 
             item.Text = item.Name = vid.filename;
