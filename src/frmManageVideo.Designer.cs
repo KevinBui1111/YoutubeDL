@@ -28,13 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lvDownload = new System.Windows.Forms.ListView();
-            this.colFilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colExt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colVidsize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colResolution = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colFolder = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.cbChannel = new System.Windows.Forms.ComboBox();
             this.cbGroup = new System.Windows.Forms.ComboBox();
             this.btnRemoveMissing = new System.Windows.Forms.Button();
@@ -42,64 +35,15 @@
             this.btnWrongDel = new System.Windows.Forms.Button();
             this.ckCompletedVideo = new System.Windows.Forms.CheckBox();
             this.cbColornew = new System.Windows.Forms.ComboBox();
+            this.olvDownload = new BrightIdeasSoftware.ObjectListView();
+            this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColSize = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColFolder = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).BeginInit();
             this.SuspendLayout();
-            // 
-            // lvDownload
-            // 
-            this.lvDownload.AllowDrop = true;
-            this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colFilename,
-            this.colExt,
-            this.colVidsize,
-            this.colResolution,
-            this.colFolder,
-            this.colID});
-            this.lvDownload.FullRowSelect = true;
-            this.lvDownload.GridLines = true;
-            this.lvDownload.HideSelection = false;
-            this.lvDownload.Location = new System.Drawing.Point(12, 68);
-            this.lvDownload.Name = "lvDownload";
-            this.lvDownload.Size = new System.Drawing.Size(535, 435);
-            this.lvDownload.TabIndex = 2;
-            this.lvDownload.UseCompatibleStateImageBehavior = false;
-            this.lvDownload.View = System.Windows.Forms.View.Details;
-            this.lvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.lvDownload_ItemDrag);
-            this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
-            this.lvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lvDownload_KeyUp);
-            // 
-            // colFilename
-            // 
-            this.colFilename.Text = "File name";
-            this.colFilename.Width = 243;
-            // 
-            // colExt
-            // 
-            this.colExt.Text = "Ext";
-            this.colExt.Width = 36;
-            // 
-            // colVidsize
-            // 
-            this.colVidsize.Text = "Size";
-            this.colVidsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.colVidsize.Width = 53;
-            // 
-            // colResolution
-            // 
-            this.colResolution.Text = "Resolution";
-            this.colResolution.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colResolution.Width = 71;
-            // 
-            // colFolder
-            // 
-            this.colFolder.Text = "Folder";
-            // 
-            // colID
-            // 
-            this.colID.Text = "VID";
-            this.colID.Width = 55;
             // 
             // cbChannel
             // 
@@ -174,11 +118,75 @@
             this.cbColornew.Size = new System.Drawing.Size(100, 23);
             this.cbColornew.TabIndex = 8;
             // 
+            // olvDownload
+            // 
+            this.olvDownload.AllColumns.Add(this.olvColumn1);
+            this.olvDownload.AllColumns.Add(this.olvColumn2);
+            this.olvDownload.AllColumns.Add(this.olvColSize);
+            this.olvDownload.AllColumns.Add(this.olvColumn4);
+            this.olvDownload.AllColumns.Add(this.olvColFolder);
+            this.olvDownload.AllColumns.Add(this.olvColumn6);
+            this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.olvColumn1,
+            this.olvColumn2,
+            this.olvColSize,
+            this.olvColumn4,
+            this.olvColFolder,
+            this.olvColumn6});
+            this.olvDownload.FullRowSelect = true;
+            this.olvDownload.GridLines = true;
+            this.olvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.olvDownload.IsSimpleDragSource = true;
+            this.olvDownload.Location = new System.Drawing.Point(12, 68);
+            this.olvDownload.Name = "olvDownload";
+            this.olvDownload.ShowGroups = false;
+            this.olvDownload.Size = new System.Drawing.Size(535, 437);
+            this.olvDownload.TabIndex = 13;
+            this.olvDownload.UseCompatibleStateImageBehavior = false;
+            this.olvDownload.View = System.Windows.Forms.View.Details;
+            this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
+            this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
+            this.olvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.olvDownload_KeyUp);
+            // 
+            // olvColumn1
+            // 
+            this.olvColumn1.AspectName = "filename";
+            this.olvColumn1.Text = "File name";
+            this.olvColumn1.Width = 238;
+            // 
+            // olvColumn2
+            // 
+            this.olvColumn2.AspectName = "ext";
+            this.olvColumn2.Text = "Ext";
+            this.olvColumn2.Width = 37;
+            // 
+            // olvColSize
+            // 
+            this.olvColSize.AspectName = "size";
+            this.olvColSize.Text = "Size";
+            // 
+            // olvColumn4
+            // 
+            this.olvColumn4.AspectName = "resolution";
+            this.olvColumn4.Text = "Resolution";
+            this.olvColumn4.Width = 69;
+            // 
+            // olvColFolder
+            // 
+            this.olvColFolder.AspectName = "channel_id";
+            this.olvColFolder.Text = "Folder";
+            // 
+            // olvColumn6
+            // 
+            this.olvColumn6.AspectName = "vid";
+            this.olvColumn6.Text = "VID";
+            // 
             // frmManageVideo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(559, 530);
+            this.Controls.Add(this.olvDownload);
             this.Controls.Add(this.ckCompletedVideo);
             this.Controls.Add(this.btnWrongDel);
             this.Controls.Add(this.lbStatus);
@@ -186,11 +194,11 @@
             this.Controls.Add(this.cbColornew);
             this.Controls.Add(this.cbChannel);
             this.Controls.Add(this.cbGroup);
-            this.Controls.Add(this.lvDownload);
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.Name = "frmManageVideo";
             this.Text = "ManageVideo";
             this.Load += new System.EventHandler(this.ManageVideo_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -198,13 +206,6 @@
 
         #endregion
 
-        private System.Windows.Forms.ListView lvDownload;
-        private System.Windows.Forms.ColumnHeader colFilename;
-        private System.Windows.Forms.ColumnHeader colExt;
-        private System.Windows.Forms.ColumnHeader colVidsize;
-        private System.Windows.Forms.ColumnHeader colResolution;
-        private System.Windows.Forms.ColumnHeader colFolder;
-        private System.Windows.Forms.ColumnHeader colID;
         private System.Windows.Forms.ComboBox cbChannel;
         private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.Button btnRemoveMissing;
@@ -212,5 +213,12 @@
         private System.Windows.Forms.Button btnWrongDel;
         private System.Windows.Forms.CheckBox ckCompletedVideo;
         private System.Windows.Forms.ComboBox cbColornew;
+        private BrightIdeasSoftware.ObjectListView olvDownload;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.OLVColumn olvColumn2;
+        private BrightIdeasSoftware.OLVColumn olvColSize;
+        private BrightIdeasSoftware.OLVColumn olvColumn4;
+        private BrightIdeasSoftware.OLVColumn olvColFolder;
+        private BrightIdeasSoftware.OLVColumn olvColumn6;
     }
 }

@@ -80,6 +80,7 @@ public class DownloadVid
 
     public string jsonYDL { get; set; }
 
+    public int downloadstatus { get; set; } //1:waiting, 2:running, 3:error
 }
 
 public class Channel{

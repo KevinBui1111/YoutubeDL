@@ -40,17 +40,6 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.lvDownload = new System.Windows.Forms.ListView();
-            this.colID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colFormat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colResolution = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colExt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colVidsize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colFilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colGroup = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colDateFormat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.col60fps = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnClick = new System.Windows.Forms.Button();
             this.btnLoadVid = new System.Windows.Forms.Button();
             this.btnMerge = new System.Windows.Forms.Button();
@@ -64,6 +53,17 @@
             this.btnChangePath = new System.Windows.Forms.Button();
             this.btnCheckFormat = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.lvDownload = new BrightIdeasSoftware.FastObjectListView();
+            this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColStatus = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColGroup = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn5 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColFps = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColSize = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColumn8 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.olvColDate = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).BeginInit();
             this.SuspendLayout();
             // 
             // btnParse
@@ -164,85 +164,6 @@
             // 
             this.columnHeader5.Text = "Size";
             this.columnHeader5.Width = 71;
-            // 
-            // lvDownload
-            // 
-            this.lvDownload.AllowDrop = true;
-            this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.colID,
-            this.colStatus,
-            this.colFormat,
-            this.colResolution,
-            this.colExt,
-            this.colVidsize,
-            this.colFilename,
-            this.colGroup,
-            this.colDateFormat,
-            this.col60fps});
-            this.lvDownload.FullRowSelect = true;
-            this.lvDownload.GridLines = true;
-            this.lvDownload.HideSelection = false;
-            this.lvDownload.Location = new System.Drawing.Point(303, 45);
-            this.lvDownload.Name = "lvDownload";
-            this.lvDownload.Size = new System.Drawing.Size(366, 407);
-            this.lvDownload.TabIndex = 1;
-            this.lvDownload.UseCompatibleStateImageBehavior = false;
-            this.lvDownload.View = System.Windows.Forms.View.Details;
-            this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
-            this.lvDownload.DragDrop += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragDrop);
-            this.lvDownload.DragEnter += new System.Windows.Forms.DragEventHandler(this.lvDownload_DragEnter);
-            this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
-            this.lvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lvDownload_KeyUp);
-            // 
-            // colID
-            // 
-            this.colID.Text = "VID";
-            this.colID.Width = 55;
-            // 
-            // colStatus
-            // 
-            this.colStatus.Text = "status";
-            this.colStatus.Width = 29;
-            // 
-            // colFormat
-            // 
-            this.colFormat.Text = "FID";
-            // 
-            // colResolution
-            // 
-            this.colResolution.Text = "Resolution";
-            this.colResolution.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colResolution.Width = 71;
-            // 
-            // colExt
-            // 
-            this.colExt.Text = "Ext";
-            this.colExt.Width = 48;
-            // 
-            // colVidsize
-            // 
-            this.colVidsize.Text = "Size";
-            this.colVidsize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.colVidsize.Width = 71;
-            // 
-            // colFilename
-            // 
-            this.colFilename.Text = "File name";
-            // 
-            // colGroup
-            // 
-            this.colGroup.Text = "Group";
-            // 
-            // colDateFormat
-            // 
-            this.colDateFormat.Text = "Date format";
-            // 
-            // col60fps
-            // 
-            this.col60fps.Text = "fps";
             // 
             // btnClick
             // 
@@ -358,7 +279,7 @@
             // 
             // btnCheckFormat
             // 
-            this.btnCheckFormat.Location = new System.Drawing.Point(201, 45);
+            this.btnCheckFormat.Location = new System.Drawing.Point(201, 44);
             this.btnCheckFormat.Name = "btnCheckFormat";
             this.btnCheckFormat.Size = new System.Drawing.Size(96, 27);
             this.btnCheckFormat.TabIndex = 10;
@@ -376,11 +297,106 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.btnVidMan_Click);
             // 
+            // lvDownload
+            // 
+            this.lvDownload.AllColumns.Add(this.olvColumn1);
+            this.lvDownload.AllColumns.Add(this.olvColStatus);
+            this.lvDownload.AllColumns.Add(this.olvColGroup);
+            this.lvDownload.AllColumns.Add(this.olvColumn4);
+            this.lvDownload.AllColumns.Add(this.olvColumn5);
+            this.lvDownload.AllColumns.Add(this.olvColFps);
+            this.lvDownload.AllColumns.Add(this.olvColSize);
+            this.lvDownload.AllColumns.Add(this.olvColumn8);
+            this.lvDownload.AllColumns.Add(this.olvColDate);
+            this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.olvColumn1,
+            this.olvColStatus,
+            this.olvColGroup,
+            this.olvColumn4,
+            this.olvColumn5,
+            this.olvColFps,
+            this.olvColSize,
+            this.olvColumn8,
+            this.olvColDate});
+            this.lvDownload.FullRowSelect = true;
+            this.lvDownload.GridLines = true;
+            this.lvDownload.IsSimpleDropSink = true;
+            this.lvDownload.Location = new System.Drawing.Point(303, 45);
+            this.lvDownload.Name = "lvDownload";
+            this.lvDownload.ShowGroups = false;
+            this.lvDownload.Size = new System.Drawing.Size(366, 407);
+            this.lvDownload.TabIndex = 11;
+            this.lvDownload.UseCompatibleStateImageBehavior = false;
+            this.lvDownload.View = System.Windows.Forms.View.Details;
+            this.lvDownload.VirtualMode = true;
+            this.lvDownload.CanDrop += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.olvDownload_CanDrop);
+            this.lvDownload.Dropped += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.olvDownload_Dropped);
+            this.lvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
+            this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
+            this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
+            // 
+            // olvColumn1
+            // 
+            this.olvColumn1.AspectName = "vid";
+            this.olvColumn1.Text = "VID";
+            // 
+            // olvColStatus
+            // 
+            this.olvColStatus.AspectName = "status";
+            this.olvColStatus.Text = "status";
+            this.olvColStatus.Width = 25;
+            // 
+            // olvColGroup
+            // 
+            this.olvColGroup.AspectName = "group";
+            this.olvColGroup.Text = "Group";
+            // 
+            // olvColumn4
+            // 
+            this.olvColumn4.AspectName = "resolution";
+            this.olvColumn4.HeaderTextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.olvColumn4.Text = "Resolution";
+            this.olvColumn4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.olvColumn4.Width = 75;
+            // 
+            // olvColumn5
+            // 
+            this.olvColumn5.AspectName = "ext";
+            this.olvColumn5.Text = "Ext";
+            this.olvColumn5.Width = 48;
+            // 
+            // olvColFps
+            // 
+            this.olvColFps.AspectName = "fps60";
+            this.olvColFps.Text = "fps";
+            this.olvColFps.Width = 28;
+            // 
+            // olvColSize
+            // 
+            this.olvColSize.AspectName = "size";
+            this.olvColSize.HeaderTextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.olvColSize.Text = "Size";
+            this.olvColSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // olvColumn8
+            // 
+            this.olvColumn8.AspectName = "title";
+            this.olvColumn8.Text = "Title";
+            // 
+            // olvColDate
+            // 
+            this.olvColDate.AspectName = "date_format";
+            this.olvColDate.Text = "Date format";
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(681, 461);
+            this.Controls.Add(this.lvDownload);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnCheckFormat);
             this.Controls.Add(this.btnChangePath);
@@ -391,7 +407,6 @@
             this.Controls.Add(this.btnAutoSelect);
             this.Controls.Add(this.cbGroup);
             this.Controls.Add(this.ckAutoparse);
-            this.Controls.Add(this.lvDownload);
             this.Controls.Add(this.lvVideo);
             this.Controls.Add(this.btnClick);
             this.Controls.Add(this.btnMerge);
@@ -400,8 +415,9 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL";
+            this.Text = "YoutubeDL v2.0  build 06/09/2015";
             this.Load += new System.EventHandler(this.frmYoutube_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -421,23 +437,12 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ListView lvDownload;
-        private System.Windows.Forms.ColumnHeader colID;
-        private System.Windows.Forms.ColumnHeader colResolution;
-        private System.Windows.Forms.ColumnHeader colExt;
-        private System.Windows.Forms.ColumnHeader colVidsize;
-        private System.Windows.Forms.ColumnHeader colFormat;
-        private System.Windows.Forms.ColumnHeader colFilename;
-        private System.Windows.Forms.ColumnHeader colStatus;
         private System.Windows.Forms.Button btnClick;
         private System.Windows.Forms.Button btnLoadVid;
         private System.Windows.Forms.Button btnMerge;
         private System.Windows.Forms.CheckBox ckAutoparse;
-        private System.Windows.Forms.ColumnHeader colGroup;
         private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.Button btnAutoSelect;
-        private System.Windows.Forms.ColumnHeader colDateFormat;
-        private System.Windows.Forms.ColumnHeader col60fps;
         private System.Windows.Forms.Label lbStatus;
         private System.Windows.Forms.ComboBox cbChannel;
         private System.Windows.Forms.TextBox txtPath;
@@ -445,5 +450,15 @@
         private System.Windows.Forms.Button btnChangePath;
         private System.Windows.Forms.Button btnCheckFormat;
         private System.Windows.Forms.Button button1;
+        private BrightIdeasSoftware.FastObjectListView lvDownload;
+        private BrightIdeasSoftware.OLVColumn olvColumn1;
+        private BrightIdeasSoftware.OLVColumn olvColStatus;
+        private BrightIdeasSoftware.OLVColumn olvColumn4;
+        private BrightIdeasSoftware.OLVColumn olvColumn5;
+        private BrightIdeasSoftware.OLVColumn olvColFps;
+        private BrightIdeasSoftware.OLVColumn olvColSize;
+        private BrightIdeasSoftware.OLVColumn olvColumn8;
+        private BrightIdeasSoftware.OLVColumn olvColDate;
+        private BrightIdeasSoftware.OLVColumn olvColGroup;
     }
 }

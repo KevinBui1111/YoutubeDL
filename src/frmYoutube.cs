@@ -19,14 +19,14 @@ namespace YoutubeDL
         const string namePattern = "[\\\\/?:*\"><|]";
         const string YoutubeLink = "https://www.youtube.com/watch?v=";
         RepositoryLite repos;
-        ListViewItem currentLVItem;
+        DownloadVid currentVid;
         string download_path = (string)Settings.Default["DownloadPath"];
         const string file_name_format = "{0}_{1}.{2}";
         const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
 
         BackgroundWorker[] bws = new BackgroundWorker[4];
         BackgroundWorker bwMerging;
-        Queue<ListViewItem> queueItem = new Queue<ListViewItem>();
+        Queue<DownloadVid> queueItem = new Queue<DownloadVid>();
         int freeBW_number;
         int num_thread;
         bool flag_cancelation;
@@ -60,13 +60,23 @@ namespace YoutubeDL
             bwMerging.DoWork += new DoWorkEventHandler(bwMerging_DoWork);
             bwMerging.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwMerging_RunWorkerCompleted);
 
-            ListViewHelper.EnableDoubleBuffer(lvDownload);
             ListViewHelper.EnableDoubleBuffer(lvVideo);
             ListViewHelper.EnableDoubleBuffer(lvAudio);
 
-            colGroup.DisplayIndex = 0;
-            colFormat.Width = 0;
-            col60fps.DisplayIndex = 6;
+            olvColGroup.DisplayIndex = 0;
+            olvColStatus.AspectGetter = delegate(object rowObject)
+            {
+                var vid = (DownloadVid)rowObject;
+                switch (vid.downloadstatus)
+                {
+                    case 1:  return "waiting";
+                    case 2:  return "running";
+                    default: return vid.status.ToString();
+                }
+            };
+            olvColSize.AspectToStringConverter = delegate(object size) { return ((long?)size).ToReadableSize(); };
+            olvColFps. AspectToStringConverter = delegate(object fps) { return (bool)fps ? "60" : null; };
+            olvColDate.AspectToStringConverter = delegate(object date_format) { return ((DateTime?)date_format).ToHumanDate(); };
 
             colorStatus = new Dictionary<int,Color>();
             colorStatus.Add(-1, DELETED);
@@ -106,11 +116,10 @@ namespace YoutubeDL
         {
             var vF = (Formats)lvVideo.SelectedItems[0].Tag;
             var aF = (Formats)lvAudio.SelectedItems[0].Tag;
-            var vid = (DownloadVid)currentLVItem.Tag;
 
-            UpdateFormat(vid, vF, aF);
-            UpdateLVItem(currentLVItem, vid);
-            repos.UpdateFormat(vid);
+            UpdateFormat(currentVid, vF, aF);
+            lvDownload.RefreshObject(currentVid);
+            repos.UpdateFormat(currentVid);
         }
 
         private void lvDownload_KeyUp(object sender, KeyEventArgs e)
@@ -127,23 +136,21 @@ namespace YoutubeDL
             lvVideo.Items.Clear();
             lvAudio.Items.Clear();
             
-            if (lvDownload.SelectedItems.Count == 0) return;
+            if (lvDownload.SelectedIndices.Count == 0) return;
 
-            SetStatusSuccess(string.Format("{0}/{1} vids selected. Size {2}", lvDownload.SelectedItems.Count, lvDownload.Items.Count,
-                (lvDownload.SelectedItems
-                    .Cast<ListViewItem>()
-                    .Sum(item => ((DownloadVid)item.Tag).size)
-                    .Value * 1.0 / 1024 / 1024)
-                    .ToString("0.00") + " MB"
+            SetStatusSuccess(string.Format("{0}/{1} vids selected. Size {2}", lvDownload.SelectedIndices.Count, lvDownload.Items.Count,
+                lvDownload.Objects
+                    .Cast<DownloadVid>()
+                    .Sum(item => item.size)
+                    .ToReadableSize()
                     ));
 
-            currentLVItem = lvDownload.SelectedItems[0];
-            var vid = (DownloadVid)currentLVItem.Tag;
-            cbGroup.Text = vid.group;
+            currentVid = (DownloadVid)lvDownload.SelectedObjects[0];
+            cbGroup.Text = currentVid.group;
 
-            if (string.IsNullOrEmpty(vid.jsonYDL)) return;
+            if (string.IsNullOrEmpty(currentVid.jsonYDL)) return;
 
-            var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(vid.jsonYDL);
+            var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(currentVid.jsonYDL);
             var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
             var audFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue).OrderByDescending(f => f.FileSize);
             
@@ -157,7 +164,7 @@ namespace YoutubeDL
                     });
                     item.Name = f.Format_Id;
                     item.Tag = f;
-                    item.Selected = vid.vidFID == f.Format_Id;
+                    item.Selected = currentVid.vidFID == f.Format_Id;
 
                     listitem.Add(item);
                 }
@@ -174,7 +181,7 @@ namespace YoutubeDL
                 });
                 item.Name = f.Format_Id;
                 item.Tag = f;
-                item.Selected = vid.audFID == f.Format_Id;
+                item.Selected = currentVid.audFID == f.Format_Id;
 
                 listitem.Add(item);
             }
@@ -183,85 +190,35 @@ namespace YoutubeDL
         }
         private void lvDownload_DoubleClick(object sender, EventArgs e)
         {
-            currentLVItem = lvDownload.SelectedItems[0];
-            var vid = (DownloadVid)currentLVItem.Tag;
-            Clipboard.SetText(YoutubeLink + vid.vid);
+            currentVid = (DownloadVid)lvDownload.SelectedObjects[0];
+            Clipboard.SetText(YoutubeLink + currentVid.vid);
         }
 
-        private void lvDownload_DragEnter(object sender, DragEventArgs e)
+        private void olvDownload_Dropped(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.Text))
-                e.Effect = DragDropEffects.Copy;
-        }
-        private void lvDownload_DragDrop(object sender, DragEventArgs e)
-        {
-            lvDownload.SelectedItems.Clear();
+            lvDownload.DeselectAll();
 
             var channel = (Channel)cbChannel.SelectedItem;
-            bool autoparse = ckAutoparse.Checked;
-            string web_url = (string)e.Data.GetData(DataFormats.Text);
+            string web_url = (string)((DataObject)e.DataObject).GetData(DataFormats.Text);
             string[] vidIDs = YoutubeDlInfo.GetVideoIDFromUrl(web_url);
             foreach (string id in vidIDs)
             {
-                if (lvDownload.Items.ContainsKey(id)) continue;
+                if (lvDownload.Objects.Cast<DownloadVid>().Any(v => v.vid == id)) continue;
 
                 var vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, channel_id = channel.id, date_add = DateTime.Now };
-                var item = InsertVidtoLV(vid);
+                lvDownload.AddObject(vid);
                 repos.Insert(vid);
-
-                if (autoparse)
-                    EnqueueItem(item);
             }
 
             lvDownload.Items[lvDownload.Items.Count - 1].EnsureVisible();
             lvDownload.Items[lvDownload.Items.Count - 1].Selected = true;
-
-            if (autoparse)
-                download_vid_format_In_Queue();
         }
-
-        ListViewItem InsertVidtoLV(DownloadVid vid)
+        private void olvDownload_CanDrop(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
         {
-            var item = CreateLVItem();
-            UpdateLVItem(item, vid);
-            lvDownload.Items.Add(item);
+            if (((DataObject)e.DataObject).GetDataPresent(DataFormats.Text))
+                e.Effect = DragDropEffects.Copy;
+        }
 
-            return item;
-        }
-        ListViewItem CreateLVItem()
-        {
-            ListViewItem item = new ListViewItem();
-            item.SubItems.AddRange(
-                new ListViewItem.ListViewSubItem[] {
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "status" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "FID" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "resolution" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "ext" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "size" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "title" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "group" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "dateformat" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "fps60" },
-                }
-            );
-            return item;
-        }
-        void UpdateLVItem(ListViewItem item, DownloadVid vid)
-        {
-            var subitems = item.SubItems;
-            subitems["status"].Text = vid.status.ToString();
-            subitems["FID"].Text = string.IsNullOrEmpty(vid.vidFID) ? null : vid.vidFID + "+" + vid.audFID;
-            subitems["resolution"].Text = vid.resolution;
-            subitems["ext"].Text = vid.ext;
-            subitems["size"].Text = vid.size.ToReadableSize();
-            subitems["title"].Text = vid.title;
-            subitems["group"].Text = vid.group;
-            subitems["dateformat"].Text = vid.date_format.ToHumanDate();
-            subitems["fps60"].Text = vid.fps60 ? "60" : null;
-            item.ForeColor = colorStatus[vid.status];
-            item.Text = item.Name = vid.vid;
-            item.Tag = vid;
-        }
         void UpdateFormat(DownloadVid vid, Formats vF, Formats aF)
         {
             vid.vidFID = vF.Format_Id;
@@ -302,15 +259,11 @@ namespace YoutubeDL
             // check any item remain in queue
             if (queueItem.Count == 0)
             {
-                IEnumerable<ListViewItem> itemParse;
-                if (lvDownload.SelectedItems.Count == 0)
-                    itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
-                    {
-                        var vid = (DownloadVid)i.Tag;
-                        return vid.status == 0;
-                    });
+                IEnumerable<DownloadVid> itemParse;
+                if (lvDownload.SelectedIndices.Count == 0)
+                    itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status == 0);
                 else
-                    itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+                    itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
                 foreach (var item in itemParse)
                     EnqueueItem(item);
@@ -323,23 +276,22 @@ namespace YoutubeDL
             if (MessageBox.Show("Are you sure to remove videos?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
                 return;
 
-            foreach (ListViewItem item in lvDownload.SelectedItems)
+            foreach (DownloadVid item in lvDownload.SelectedObjects)
             {
-                repos.DeleteVid(item.Name);
-                item.Remove();
+                repos.DeleteVid(item.vid);
+                lvDownload.RemoveObject(item);
             }
         }
         private void btnDownload_Click(object sender, EventArgs e)
         {
-            var itemDown = lvDownload.SelectedItems.Count == 0 ?
-                lvDownload.Items.Cast<ListViewItem>() : lvDownload.SelectedItems.Cast<ListViewItem>();
+            var itemDown = lvDownload.SelectedIndices.Count == 0 ?
+                lvDownload.Objects.Cast<DownloadVid>() : lvDownload.SelectedObjects.Cast<DownloadVid>();
 
             string idm_format = "-a /d {0} /p \"{1}\" /f \"{2}\"";
 
             repos.BeginUpdate();
-            foreach (var item in itemDown)
+            foreach (var vid in itemDown)
             {
-                var vid = (DownloadVid)item.Tag;
                 if (vid.status != 2) continue;
 
                 var p = new Process
@@ -366,7 +318,7 @@ namespace YoutubeDL
 
                 vid.status = 3;
                 repos.UpdateStatus(vid);
-                UpdateLVItem(item, vid);
+                lvDownload.RefreshObject(vid);
             }
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
         }
@@ -379,31 +331,25 @@ namespace YoutubeDL
             else
             {
                 SetStatusError("Start merging video...");
-                bwMerging.RunWorkerAsync(lvDownload.Items.Cast<ListViewItem>().ToArray());
+                bwMerging.RunWorkerAsync();
                 btnMerge.Text = "Stop";
             }
         }
         private void btnAutoSelect_Click(object sender, EventArgs e)
         {
-            IEnumerable<ListViewItem> itemParse;
-            if (lvDownload.SelectedItems.Count == 0)
-                itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
-                {
-                    var vid = (DownloadVid)i.Tag;
-                    return vid.status == 1;
-                });
+            IEnumerable<DownloadVid> itemParse;
+            if (lvDownload.SelectedIndices.Count == 0)
+                itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status == 1);
             else
-                itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+                itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
             long diffSize = 50 * 1024 * 1024;
 
             repos.BeginUpdate();
             lvDownload.BeginUpdate();
-            List<ListViewItem> errorItem = new List<ListViewItem>();
-            foreach (ListViewItem item in itemParse)
+            List<DownloadVid> errorItem = new List<DownloadVid>();
+            foreach (DownloadVid vid in itemParse.ToArray())
             {
-                var vid = (DownloadVid)item.Tag;
-
                 var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(vid.jsonYDL);
                 if (vidInfo == null) continue;
 
@@ -419,11 +365,11 @@ namespace YoutubeDL
 
                 var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
                 if (aF == null)
-                    errorItem.Add(item);
+                    errorItem.Add(vid);
                 else
                 {
                     UpdateFormat(vid, vF, aF);
-                    UpdateLVItem(item, vid);
+                    lvDownload.RefreshObject(vid);
                     repos.UpdateFormat(vid);
                 }
             }
@@ -432,7 +378,11 @@ namespace YoutubeDL
             //BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
 
             if (errorItem.Count != 0
-                && MessageBox.Show(string.Format("Following item has corrupt format: {0}\n\nDo you want to reload format for them?", string.Join(", ", errorItem.Select(it => ((DownloadVid)it.Tag).vid).ToArray())), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+                && MessageBox.Show(string.Format(
+                        "Following item has corrupt format: {0}\n\nDo you want to reload format for them?",
+                        string.Join(", ", errorItem.Select(it => it.vid).ToArray())
+                    ),
+                    "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
                 == DialogResult.Yes)
             {
                 queueItem.Clear();
@@ -470,38 +420,34 @@ namespace YoutubeDL
             if (bw.IsBusy) return;
 
             --freeBW_number;
-            var item = queueItem.Dequeue();
-            item.BackColor = Color.LightBlue;
-            item.SubItems["status"].Text = "running";
-            item.EnsureVisible();
+            var vid = queueItem.Dequeue();
+            vid.downloadstatus = 2; //running
+            lvDownload.RefreshObject(vid);
+            lvDownload.EnsureModelVisible(vid);
 
-            bw.RunWorkerAsync(new object[] { item, ((DownloadVid)item.Tag).vid });
+            bw.RunWorkerAsync(vid);
         }
 
         private void download_vid_work(object sender, DoWorkEventArgs e)
         {
-            object[] parameters = e.Argument as object[];
+            var vid = (DownloadVid)e.Argument;
 
-            var vidInfo = LoadVideoInfo((string)parameters[1]);
-            e.Result = new object[] { parameters[0], vidInfo };
+            var vidInfo = LoadVideoInfo(vid.vid);
+            e.Result = new object[] { e.Argument, vidInfo };
         }
         private void download_vid_complete(object sender, RunWorkerCompletedEventArgs e)
         {
             object[] parameters = (object[])e.Result;
 
-            var item = (ListViewItem)parameters[0];
+            var vid = (DownloadVid)parameters[0];
             var vidInfo = (YoutubeDlInfo)parameters[1];
-            var vid = (DownloadVid)item.Tag;
-
-            item.BackColor = Color.Transparent;
 
             if (vidInfo.error)
             {
                 var frmLog = frmYTLog.GetInstance(this);
                 frmLog.AddLog(vidInfo.error_message);
-                UpdateLVItem(item, vid);
-
-                item.ForeColor = Color.Red;
+                vid.downloadstatus = 3;
+                lvDownload.RefreshObject(vid);
             }
             else
             {
@@ -511,7 +457,9 @@ namespace YoutubeDL
                 vid.date_format = DateTime.Now;
                 vid.fps60 = vidInfo.Formats.Exists(f => f.Fps > 30);
                 repos.UpdateAfterLoading(vid);
-                UpdateLVItem(item, vid);
+
+                vid.downloadstatus = 0;
+                lvDownload.RefreshObject(vid);
             }
 
             ++freeBW_number;
@@ -538,27 +486,23 @@ namespace YoutubeDL
         {
             var bw = (BackgroundWorker)sender;
 
-            foreach (ListViewItem item in (ListViewItem[])e.Argument)
+            foreach (DownloadVid vid in lvDownload.Objects)
             {
                 if (bw.CancellationPending) return;
 
-                var vid = (DownloadVid)item.Tag;
                 if (vid.status != 3) continue;
 
-                this.Invoke((MethodInvoker)delegate { item.EnsureVisible(); });
-
-                item.BackColor = Color.LightBlue;
+                lvDownload.EnsureModelVisible(vid);
 
                 var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
                 var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
                 bool complete = vidFI.Exists && vidFI.Length == vid.vidSize &&
                                 audFI.Exists && audFI.Length == vid.audSize;
 
-                if (!complete)
-                {
-                    item.BackColor = Color.Transparent;
-                    continue;
-                }
+                if (!complete) continue;
+
+                vid.downloadstatus = 1;
+                lvDownload.RefreshObject(vid);
 
                 string desFolder = download_path
                     + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
@@ -597,11 +541,11 @@ namespace YoutubeDL
                     File.Delete(download_path + "\\" + vid.audFilename);
                     vid.status = 4;
                     vid.date_merge = DateTime.Now;
-                    this.Invoke((MethodInvoker)delegate { UpdateLVItem(item, vid); });
                     repos.UpdateAfterMerging(vid);
                 }
 
-                item.BackColor = Color.Transparent;
+                vid.downloadstatus = 0;
+                lvDownload.RefreshObject(vid);
             }
 
         }
@@ -656,28 +600,29 @@ namespace YoutubeDL
             vidInfo.error_message = sb.ToString();
             return vidInfo;
         }
-        bool ItemInProcessing(ListViewItem item)
+        bool ItemInProcessing(DownloadVid item)
         {
-            return Regex.IsMatch(item.SubItems["status"].Text, "running|waiting");
+            return item.downloadstatus == 1 || item.downloadstatus == 2;
         }
-        void EnqueueItem(ListViewItem item)
+        void EnqueueItem(DownloadVid item)
         {
             if (ItemInProcessing(item))
                 return;
 
-            item.SubItems["status"].Text = "waiting";
+            item.downloadstatus = 1;
+            lvDownload.RefreshObject(item);
+
             queueItem.Enqueue(item);
         }
         void ChangeGroupVid()
         {
             string group = cbGroup.Text;
-            foreach (ListViewItem item in lvDownload.SelectedItems)
+            foreach (DownloadVid vid in lvDownload.SelectedObjects)
             {
-                var vid = (DownloadVid)item.Tag;
                 vid.group = group;
-                UpdateLVItem(item, vid);
                 repos.UpdateGroup(vid);
             }
+            lvDownload.RefreshObjects(lvDownload.SelectedObjects);
         }
         IAsyncResult BeginAsync(Action action, string beginText, string endText)
         {
@@ -718,10 +663,8 @@ namespace YoutubeDL
         {
             lvDownload.BeginUpdate();
 
-            lvDownload.Items.Clear();
             var listVid = repos.LoadDownloadVideo(channel_id, group, false);
-            foreach (var vid in listVid)
-                InsertVidtoLV(vid);
+            lvDownload.SetObjects(listVid);
 
             lvDownload.EndUpdate();
 
@@ -749,23 +692,18 @@ namespace YoutubeDL
 
         private void btnCheckFormat_Click(object sender, EventArgs e)
         {
-            IEnumerable<ListViewItem> itemParse;
-            if (lvDownload.SelectedItems.Count == 0)
-                itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
-                {
-                    var vid = (DownloadVid)i.Tag;
-                    return vid.status >= 1;
-                });
+            IEnumerable<DownloadVid> itemParse;
+            if (lvDownload.SelectedIndices.Count == 0)
+                itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status >= 1);
             else
-                itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+                itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
-            List<ListViewItem> errorItem = new List<ListViewItem>();
+            List<DownloadVid> errorItem = new List<DownloadVid>();
             //List<string> errorFormat = new List<string>();
 
-            foreach (var item in itemParse)
+            foreach (var vid in itemParse)
             {
                 bool res = true;
-                var vid = (DownloadVid)item.Tag;
 
                 var vidInfo = new JavaScriptSerializer().Deserialize<YoutubeDlInfo>(vid.jsonYDL);
                 var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
@@ -773,7 +711,7 @@ namespace YoutubeDL
                 foreach (Formats f in vidFormats)
                 {
                     if (f.Width == null || f.Height == null || f.Fps == null || f.FileSize == null){
-                        errorItem.Add(item);
+                        errorItem.Add(vid);
                         //errorFormat.Add(f.Format_Id);
                         res = false;
                         break;
@@ -783,12 +721,17 @@ namespace YoutubeDL
                 if (!res) continue;
 
                 if(vidInfo.Formats.Any(f => f.Format_Note == "DASH audio" && f.FileSize == null))
-                    errorItem.Add(item);
+                    errorItem.Add(vid);
             }
 
             if (errorItem.Count == 0)
                 MessageBox.Show("All items are proper.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            else if (MessageBox.Show(string.Format("Following item has corrupt format: {0}\n\nDo you want to reload format for them?", string.Join(", ", errorItem.Select(it => ((DownloadVid)it.Tag).vid).ToArray())), "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
+            else if (MessageBox.Show(
+                string.Format(
+                    "Following item has corrupt format: {0}\n\nDo you want to reload format for them?",
+                    string.Join(", ", errorItem.Select(it => it.vid).ToArray())
+                ),
+                "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning)
                 == DialogResult.Yes)
             {
                 queueItem.Clear();
@@ -805,6 +748,13 @@ namespace YoutubeDL
         {
             frmManageVideo frm = new frmManageVideo();
             frm.Show();
+        }
+
+        private void olvDownload_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
+        {
+            DownloadVid vid = (DownloadVid)e.Model;
+            e.Item.ForeColor = vid.downloadstatus == 3 ? Color.Red : colorStatus[vid.status];
+            e.Item.BackColor = (vid.downloadstatus == 2) ? Color.LightBlue : Color.Transparent;
         }
     }
 }

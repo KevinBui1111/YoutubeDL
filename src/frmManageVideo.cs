@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using YoutubeDL.Models;
+using BrightIdeasSoftware;
 
 namespace YoutubeDL
 {
@@ -42,14 +43,8 @@ namespace YoutubeDL
         {
             new_channel_id = ((Channel)cbColornew.SelectedItem).id;
 
-            lvDownload.BeginUpdate();
-
-            lvDownload.Items.Clear();
             var listVid = repos.LoadDownloadVideo(channel_id, group, ckCompletedVideo.Checked).OrderBy(v => v.filename);
-            foreach (var vid in listVid)
-                InsertVidtoLV(vid);
-
-            lvDownload.EndUpdate();
+            olvDownload.SetObjects(listVid);
 
             // load group list to combobox
             if (reloadGroup)
@@ -65,8 +60,9 @@ namespace YoutubeDL
         Dictionary<int, Channel> dicChannel;
         private void ManageVideo_Load(object sender, EventArgs e)
         {
-            ListViewHelper.EnableDoubleBuffer(lvDownload);
-
+            olvColSize  .AspectToStringConverter = delegate(object size)       { return ((long?)size).ToReadableSize(); };
+            olvColFolder.AspectToStringConverter = delegate(object channel_id) { return dicChannel[(int)channel_id].folder; };
+            
             var channels = repos.Get_Channel_list();
             dicChannel = channels.ToDictionary(s => s.id);
 
@@ -79,50 +75,9 @@ namespace YoutubeDL
             cbChannel.SelectedIndex = 0;
         }
 
-        ListViewItem InsertVidtoLV(DownloadVid vid)
+        private void olvDownload_ItemDrag(object sender, ItemDragEventArgs e)
         {
-            var item = CreateLVItem();
-            UpdateLVItem(item, vid);
-            lvDownload.Items.Add(item);
-
-            return item;
-        }
-        ListViewItem CreateLVItem()
-        {
-            ListViewItem item = new ListViewItem();
-            item.SubItems.AddRange(
-                new ListViewItem.ListViewSubItem[] {
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "ext" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "size" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "resolution" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "folder" },
-                    new ListViewItem.ListViewSubItem(item, null) { Name = "vid" },
-                }
-            );
-            return item;
-        }
-        void UpdateLVItem(ListViewItem item, DownloadVid vid)
-        {
-            var subitems = item.SubItems;
-            subitems["ext"].Text = vid.ext;
-            subitems["size"].Text = vid.size.ToReadableSize();
-            subitems["resolution"].Text = vid.resolution;
-            subitems["folder"].Text = dicChannel[vid.channel_id].folder;
-            subitems["vid"].Text = vid.vid;
-
-            if (!File.Exists(getFullfilename(vid)))
-                item.ForeColor = Color.Red;
-            else if (new_channel_id > 0 && vid.channel_id >= new_channel_id)
-                item.ForeColor = Color.RoyalBlue;
-
-            item.Text = item.Name = vid.filename;
-            item.Tag = vid;
-        }
-
-        private void lvDownload_ItemDrag(object sender, ItemDragEventArgs e)
-        {
-            var currentLVItem = (ListViewItem)e.Item;
-            var vid = (DownloadVid)currentLVItem.Tag;
+            var vid = (DownloadVid)((OLVListItem)e.Item).RowObject;
             var selection = new string[] { getFullfilename(vid) };
             DataObject data = new DataObject(DataFormats.FileDrop, selection);
             this.DoDragDrop(data, DragDropEffects.Copy | DragDropEffects.Move);
@@ -131,8 +86,7 @@ namespace YoutubeDL
         string vidFolder = @"i:\YDL\";
         private void lvDownload_DoubleClick(object sender, EventArgs e)
         {
-            var currentLVItem = lvDownload.SelectedItems[0];
-            var vid = (DownloadVid)currentLVItem.Tag;
+            var vid = (DownloadVid)olvDownload.SelectedObject;
 
             try
             {
@@ -155,53 +109,24 @@ namespace YoutubeDL
 
         }
 
-        private void lvDownload_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Delete)
-            {
-                var currentLVItem = lvDownload.SelectedItems[0];
-                var vid = (DownloadVid)currentLVItem.Tag;
-
-                FileSystem.DeleteFile(getFullfilename(vid), UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
-
-                if (!File.Exists(getFullfilename(vid)))
-                {
-                    vid.status = -1;
-                    repos.UpdateStatus(vid);
-
-                    currentLVItem.Remove();
-                }
-            }
-        }
-
         private void btnRemoveMissing_Click(object sender, EventArgs e)
         {
-            IEnumerable<ListViewItem> itemParse;
-            if (lvDownload.SelectedItems.Count == 0)
-                itemParse = lvDownload.Items.Cast<ListViewItem>().Where(i =>
-                {
-                    var vid = (DownloadVid)i.Tag;
-                    return vid.status == 4;
-                });
+            IEnumerable<DownloadVid> itemParse;
+            if (olvDownload.SelectedItems.Count == 0)
+                itemParse = olvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status == 4);
             else
-                itemParse = lvDownload.SelectedItems.Cast<ListViewItem>();
+                itemParse = olvDownload.SelectedObjects.Cast<DownloadVid>();
 
-            lvDownload.BeginUpdate();
-
-            foreach (var item in itemParse)
+            foreach (var vid in itemParse.ToArray())
             {
-                var vid = (DownloadVid)item.Tag;
-
                 if (!File.Exists(getFullfilename(vid)))
                 {
                     vid.status = -1;
                     repos.UpdateStatus(vid);
 
-                    item.Remove();
+                    olvDownload.RemoveObject(vid);
                 }
             }
-
-            lvDownload.EndUpdate();
         }
 
         private void btnWrongDel_Click(object sender, EventArgs e)
@@ -223,5 +148,69 @@ namespace YoutubeDL
                 wrongdel.Count, string.Join(", ", wrongdel.ToArray())));
         }
 
+        void Checkgroup()
+        {
+            var allvid = repos.LoadDownloadVideo(0, null, false);
+            var allfile = new DirectoryInfo(vidFolder).GetFiles("*", System.IO.SearchOption.AllDirectories);
+            var query = from file in allfile
+                        join vid in allvid on file.Name equals vid.filename into gj
+                        from g in gj.DefaultIfEmpty()
+                        select new { file, g };
+
+            //int c = query.Count(q => q.g != null);
+            List<string> resfail = new List<string>();
+            foreach (var r in query)
+            {
+                bool res = false;
+                if (r.file.Directory.Parent.Name == "YDL")
+                    res = r.file.Directory.Name == dicChannel[r.g.channel_id].folder;
+                else
+                    res = r.file.Directory.Parent.Name == dicChannel[r.g.channel_id].folder
+                        && r.file.Directory.Name == r.g.group;
+
+                if (!res)
+                {
+                    r.g.group = r.file.Directory.Name;
+                    repos.UpdateGroup(r.g);
+                    //resfail.Add(r.file.FullName);
+                }
+            }
+
+            //Clipboard.SetText(string.Join("\r\n", resfail.ToArray()));
+        }
+
+        private void olvDownload_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
+        {
+            DownloadVid vid = (DownloadVid)e.Model;
+            if (!File.Exists(getFullfilename(vid)))
+                e.Item.ForeColor = Color.Red;
+            else if (new_channel_id > 0 && vid.channel_id >= new_channel_id)
+                e.Item.ForeColor = Color.RoyalBlue;
+        }
+
+        private void olvDownload_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                var vid = (DownloadVid)olvDownload.SelectedObject;
+
+                try
+                {
+                    FileSystem.DeleteFile(getFullfilename(vid), UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
+
+                    if (!File.Exists(getFullfilename(vid)))
+                    {
+                        vid.status = -1;
+                        repos.UpdateStatus(vid);
+
+                        olvDownload.RemoveObject(vid);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
     }
 }
