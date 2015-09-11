@@ -654,7 +654,7 @@ namespace YoutubeDL
         private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
         {
             var channel = (Channel)cbChannel.SelectedItem;
-            LoadVideoChannel(channel.id, null);
+            LoadVideoChannel(channel.id, "All");
 
             lvDownload.AllowDrop = channel.id > 0;
         }
