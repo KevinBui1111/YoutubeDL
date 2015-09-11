@@ -238,8 +238,8 @@ namespace YoutubeDL.Models
             DataTable dt = db.GetDataTable(
                 string.Format("select * " +
                               "from video " +
-                              "where ({0} = 0 OR channel_id = {0}) " + 
-                                    "AND ('{1}' = '' OR [group] = '{1}' OR ('{1}' = 'zOthers' AND [group] = '')) " +
+                              "where ({0} = 0 OR channel_id = {0}) " +
+                                    "AND ('{1}' = 'All' OR [group] = '{1}' OR ('{1}' = '' AND ([group] = '' OR [group] is null))) " +
                                     (showCompleted ? "AND status = 4 " : "AND status >= 0"),
                             channel_id, SQLiteDatabase.Escape(group))
                 );

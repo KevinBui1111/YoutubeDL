@@ -323,6 +323,8 @@
             this.olvColDate});
             this.lvDownload.FullRowSelect = true;
             this.lvDownload.GridLines = true;
+            this.lvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.lvDownload.HideSelection = false;
             this.lvDownload.IsSimpleDropSink = true;
             this.lvDownload.Location = new System.Drawing.Point(303, 45);
             this.lvDownload.Name = "lvDownload";
@@ -415,7 +417,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.0  build 06/09/2015";
+            this.Text = "YoutubeDL v2.1  build 11/09/2015";
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();
             this.ResumeLayout(false);

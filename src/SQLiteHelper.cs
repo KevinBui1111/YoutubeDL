@@ -221,7 +221,7 @@ namespace YoutubeDL
 
         internal static string NormalizeParam(string p)
         {
-            return p == null ? "null" :
+            return string.IsNullOrEmpty(p) ? "null" :
                         string.Format("'{0}'", Escape(p));
         }
         internal static string NormalizeParam(long? p)
