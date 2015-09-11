@@ -68,7 +68,7 @@ namespace YoutubeDL
 
             cbChannel.Items.Add(new Channel { id = 0, name = "All" });
             cbChannel.Items.AddRange(channels);
-            cbChannel.SelectedIndex = 2;
+            cbChannel.SelectedIndex = 0;
         }
 
         private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
