@@ -119,6 +119,7 @@ namespace YoutubeDL
                         repos.UpdateStatus(vid);
 
                         olvDownload.RemoveObject(vid);
+                        olvDownload.FocusedItem.Selected = true;
                     }
                 }
                 catch (Exception ex)
