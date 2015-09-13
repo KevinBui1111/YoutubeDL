@@ -139,17 +139,6 @@ namespace YoutubeDL
 
         private void btnRemoveMissing_Click(object sender, EventArgs e)
         {
-            Bitmap newImage = new Bitmap("aa.bmp");
-            Image resizeImg = ResizeBitmap(newImage, imageList1.ImageSize.Width);
-            olvDownload.LargeImageList.Images.Add("aa.bmp", resizeImg);
-            newImage.Dispose();
-
-            newImage = new Bitmap("bb.bmp");
-            resizeImg = ResizeBitmap(newImage, imageList1.ImageSize.Width);
-            newImage.Dispose();
-            olvDownload.LargeImageList.Images.Add("bb.bmp", resizeImg);
-
-            return;
             IEnumerable<DownloadVid> itemParse;
             if (olvDownload.SelectedItems.Count == 0)
                 itemParse = olvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status == 4);
