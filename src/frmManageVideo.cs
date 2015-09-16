@@ -13,6 +13,8 @@ using YoutubeDL.Models;
 using BrightIdeasSoftware;
 using Microsoft.WindowsAPICodePack.Shell;
 using System.Threading;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace YoutubeDL
 {
@@ -22,9 +24,7 @@ namespace YoutubeDL
         Dictionary<int, Channel> dicChannel;
         int new_channel_id;
         string vidFolder = @"i:\YDL\";
-        Random r = new Random();
-        BackgroundWorker bwLoadImage;
-        Queue<DownloadVid> queueVidNeedLoad;
+        BlockingCollection<DownloadVid> queueVidNeedLoad;
         AutoResetEvent eventHasItem;
 
         public frmManageVideo()
@@ -33,11 +33,13 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
-            queueVidNeedLoad = new Queue<DownloadVid>();
+            queueVidNeedLoad = new BlockingCollection<DownloadVid>();
             eventHasItem = new AutoResetEvent(false);
 
-            bwLoadImage = new BackgroundWorker();
-            bwLoadImage.DoWork += bwLoadImage_DoWork;
+            Task.Factory.StartNew(bwLoadImage_DoWork);
+            Task.Factory.StartNew(bwLoadImage_DoWork);
+            Task.Factory.StartNew(bwLoadImage_DoWork);
+            Task.Factory.StartNew(bwLoadImage_DoWork);
 
             olvColSize.AspectToStringConverter = delegate(object size) { return ((long?)size).ToReadableSize(); };
             olvColFolder.AspectToStringConverter = delegate(object channel_id) { return dicChannel[(int)channel_id].folder; };
@@ -47,7 +49,7 @@ namespace YoutubeDL
                 string key = vid.vid;
 
                 if (!olvDownload.LargeImageList.Images.ContainsKey(key))
-                    queueVidNeedLoad.Enqueue(vid);
+                    queueVidNeedLoad.Add(vid);
 
                 return key;
             };
@@ -182,11 +184,10 @@ namespace YoutubeDL
             else
                 olvDownload.View = View.Details;
         }
-        private void bwLoadImage_DoWork(object sender, DoWorkEventArgs e)
+        private void bwLoadImage_DoWork()
         {
-            while (queueVidNeedLoad.Count > 0)
+            foreach (var vid in queueVidNeedLoad.GetConsumingEnumerable())
             {
-                var vid = queueVidNeedLoad.Dequeue();
                 GetThumbnailVideo(vid);
             }
         }
@@ -208,10 +209,10 @@ namespace YoutubeDL
             }
             else
             {
-                queueVidNeedLoad.Clear();
+                DownloadVid vid;
+
+                while(queueVidNeedLoad.TryTake(out vid));
                 olvDownload.SetObjects(listVid);
-                if (!bwLoadImage.IsBusy)
-                    bwLoadImage.RunWorkerAsync();
             }
 
             lbStatus.Text = string.Format("Total: {0} videos", listVid.Count());
@@ -259,8 +260,6 @@ namespace YoutubeDL
 
         void AddToImageList(string key, Image img)
         {
-            if (imageList1.Images.ContainsKey(key)) return;
-
             if (olvDownload.InvokeRequired)
             {
                 olvDownload.Invoke(new Action(() => AddToImageList(key, img)));
@@ -283,8 +282,6 @@ namespace YoutubeDL
         {
             try
             {
-                //Thread.Sleep(10000);
-                //return null;
                 ShellFile shellFile = ShellFile.FromFilePath(getFullfilename(vid));
                 Bitmap shellThumb = shellFile.Thumbnail.ExtraLargeBitmap;
                 Image thumb = ResizeBitmap(shellThumb, imageList1.ImageSize.Width);
@@ -317,6 +314,11 @@ namespace YoutubeDL
             using (Graphics g = Graphics.FromImage((Image)result))
                 g.DrawImage(b, left, top, newW, newH);
             return result;
+        }
+
+        private void frmManageVideo_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            queueVidNeedLoad.CompleteAdding();
         }
     }
 }

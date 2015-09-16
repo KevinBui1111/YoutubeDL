@@ -1,3 +1,13 @@
+CREATE TABLE [channel] (
+  [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+  [name] TEXT, 
+  [folder] TEXT, 
+  [ytchannel_id] TEXT);
+
+CREATE INDEX [idx_name] ON [channel] ([name]);
+
+CREATE UNIQUE INDEX [idx_channel_id] ON [channel] ([ytchannel_id]);
+
 CREATE TABLE "video" (
   [vid] TEXT, 
   [vidFID] TEXT, 
@@ -24,4 +34,3 @@ CREATE TABLE "video" (
   [jsonRecord] TEXT);
 
 CREATE UNIQUE INDEX [idx_vid] ON [video] ([vid]);
-

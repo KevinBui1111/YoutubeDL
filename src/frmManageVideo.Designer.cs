@@ -226,6 +226,7 @@
             this.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.Name = "frmManageVideo";
             this.Text = "ManageVideo";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmManageVideo_FormClosed);
             this.Load += new System.EventHandler(this.frmManageVideo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).EndInit();
             this.ResumeLayout(false);
