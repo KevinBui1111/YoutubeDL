@@ -514,8 +514,8 @@ namespace YoutubeDL
 
         YoutubeDlInfo LoadVideoInfo(string vidID)
         {
-            System.Threading.Thread.Sleep(rnd.Next(200, 1000));
-            return new YoutubeDlInfo { error = true };
+            //System.Threading.Thread.Sleep(rnd.Next(200, 1000));
+            //return new YoutubeDlInfo { error = true };
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Start LoadVideoInfo: youtube-dl -j " + vidID);
