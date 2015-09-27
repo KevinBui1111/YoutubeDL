@@ -129,8 +129,8 @@
             this.olvDownload.AllColumns.Add(this.olvColumn4);
             this.olvDownload.AllColumns.Add(this.olvColFolder);
             this.olvDownload.AllColumns.Add(this.olvColumn6);
-            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
@@ -152,6 +152,7 @@
             this.olvDownload.TabIndex = 13;
             this.olvDownload.UseCompatibleStateImageBehavior = false;
             this.olvDownload.View = System.Windows.Forms.View.Details;
+            this.olvDownload.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.olvDownload_CellRightClick);
             this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
             this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
             this.olvDownload.DoubleClick += new System.EventHandler(this.olvDownload_DoubleClick);

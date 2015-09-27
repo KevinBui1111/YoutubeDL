@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
 
 namespace YoutubeDL
 {
@@ -143,6 +146,22 @@ namespace YoutubeDL
             catch
             {
                 return false;
+            }
+        }
+
+        public static byte[] ImageToByte(Image image)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                image.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
+            }
+        }
+        public static Image ByteToImage(byte[] imageBytes)
+        {
+            using (MemoryStream ms = new MemoryStream(imageBytes))
+            {
+                return Image.FromStream(ms);
             }
         }
     }

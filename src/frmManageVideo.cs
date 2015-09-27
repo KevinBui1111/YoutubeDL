@@ -15,6 +15,7 @@ using Microsoft.WindowsAPICodePack.Shell;
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace YoutubeDL
 {
@@ -23,9 +24,25 @@ namespace YoutubeDL
         RepositoryLite repos = new RepositoryLite();
         Dictionary<int, Channel> dicChannel;
         int new_channel_id;
-        string vidFolder = @"i:\YDL\";
+        const string vidFolder = @"i:\YDL\",
+                imagecachePath = @"ImageList.bin";
         BlockingCollection<DownloadVid> queueVidNeedLoad;
-        AutoResetEvent eventHasItem;
+
+        static frmManageVideo openForm = null;
+        // No need for locking - you'll be doing all this on the UI thread...
+        public static void ShowInstance()
+        {
+            if (openForm == null)
+            {
+                openForm = new frmManageVideo();
+                openForm.FormClosed += delegate { openForm = null; };
+                openForm.Show();
+            }
+        }
+        public static void CloseInstance()
+        {
+            if (openForm != null) openForm.Close();
+        }
 
         public frmManageVideo()
         {
@@ -33,8 +50,9 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
+            FlatImage.Deserialize(imageList1, imagecachePath);
+
             queueVidNeedLoad = new BlockingCollection<DownloadVid>();
-            eventHasItem = new AutoResetEvent(false);
 
             Task.Factory.StartNew(bwLoadImage_DoWork);
             Task.Factory.StartNew(bwLoadImage_DoWork);
@@ -72,6 +90,10 @@ namespace YoutubeDL
             cbChannel.Items.AddRange(channels);
             cbChannel.SelectedIndex = 0;
         }
+        private void frmManageVideo_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            queueVidNeedLoad.CompleteAdding();
+        }
 
         private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -100,7 +122,7 @@ namespace YoutubeDL
             {
                 Process.Start(getFullfilename(vid));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
@@ -137,6 +159,11 @@ namespace YoutubeDL
                 e.Item.ForeColor = Color.Red;
             else if (new_channel_id > 0 && vid.channel_id >= new_channel_id)
                 e.Item.ForeColor = Color.RoyalBlue;
+        }
+        private void olvDownload_CellRightClick(object sender, CellRightClickEventArgs e)
+        {
+            var vid = (DownloadVid)e.Model;
+            if (vid != null) Clipboard.SetText(vid.title);
         }
 
         private void btnRemoveMissing_Click(object sender, EventArgs e)
@@ -188,7 +215,22 @@ namespace YoutubeDL
         {
             foreach (var vid in queueVidNeedLoad.GetConsumingEnumerable())
             {
-                GetThumbnailVideo(vid);
+                try
+                {
+                    // Get Thumbnail Video;
+                    Bitmap shellThumb = ShellFile
+                        .FromFilePath(getFullfilename(vid))
+                        .Thumbnail
+                        .ExtraLargeBitmap;
+
+                    Image thumb = ResizeBitmap(shellThumb, imageList1.ImageSize.Width);
+                    shellThumb.Dispose();
+
+                    AddToImageList(vid.vid, thumb);
+
+                    repos.SaveImage(vid.vid, Helper.ImageToByte(thumb));
+                }
+                catch (FileNotFoundException) { }
             }
         }
 
@@ -211,7 +253,7 @@ namespace YoutubeDL
             {
                 DownloadVid vid;
 
-                while(queueVidNeedLoad.TryTake(out vid));
+                while (queueVidNeedLoad.TryTake(out vid)) ;
                 olvDownload.SetObjects(listVid);
             }
 
@@ -223,7 +265,7 @@ namespace YoutubeDL
                 return string.Format(@"{0}{1}\{2}",
                     vidFolder, dicChannel[vid.channel_id].folder, vid.filename);
             else
-                return string.Format(@"{0}{1}\{2}\{3}", 
+                return string.Format(@"{0}{1}\{2}\{3}",
                     vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
 
         }
@@ -261,38 +303,10 @@ namespace YoutubeDL
         void AddToImageList(string key, Image img)
         {
             if (olvDownload.InvokeRequired)
-            {
                 olvDownload.Invoke(new Action(() => AddToImageList(key, img)));
-            }
             else
-            {
                 imageList1.Images.Add(key, img);
-            }
 
-        }
-        void GetThumbnailVideo(DownloadVid vid)
-        {
-            Image img = GetLargeImageFromStorage(vid);
-            if (img != null)
-                AddToImageList(vid.vid, img);
-                //imageList1.Images.Add(vid.vid, img);
-
-        }
-        Image GetLargeImageFromStorage(DownloadVid vid)
-        {
-            try
-            {
-                ShellFile shellFile = ShellFile.FromFilePath(getFullfilename(vid));
-                Bitmap shellThumb = shellFile.Thumbnail.ExtraLargeBitmap;
-                Image thumb = ResizeBitmap(shellThumb, imageList1.ImageSize.Width);
-                shellThumb.Dispose();
-
-                return thumb;
-            }
-            catch
-            {
-                return null;
-            }
         }
         Image ResizeBitmap(Bitmap b, int nSize)
         {
@@ -315,10 +329,25 @@ namespace YoutubeDL
                 g.DrawImage(b, left, top, newW, newH);
             return result;
         }
+    }
 
-        private void frmManageVideo_FormClosed(object sender, FormClosedEventArgs e)
+    [Serializable()]
+    public class FlatImage
+    {
+        public Image _image { get; set; }
+        public string _key { get; set; }
+
+        internal static void Deserialize(ImageList imglist, string pathImagebin)
         {
-            queueVidNeedLoad.CompleteAdding();
+            RepositoryLite repo = new RepositoryLite();
+            List<FlatImage> ilc = repo.LoadImage();
+
+            for (int index = 0; index < ilc.Count; index++)
+            {
+                Image i = ilc[index]._image;
+                string key = ilc[index]._key;
+                imglist.Images.Add(key, i);
+            }
         }
     }
 }

@@ -18,13 +18,14 @@ namespace YoutubeDL
 {
     public partial class frmYoutube : Form
     {
-        const string namePattern = "[\\\\/?:*\"><|]";
-        const string YoutubeLink = "https://www.youtube.com/watch?v=";
+        const string namePattern = "[\\\\/?:*\"><|]",
+            file_name_format = "{0}_{1}.{2}",
+            ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"",
+            YoutubeLink = "https://www.youtube.com/watch?v=";
+
         RepositoryLite repos;
         DownloadVid currentVid;
         string download_path = (string)Settings.Default["DownloadPath"];
-        const string file_name_format = "{0}_{1}.{2}";
-        const string ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
 
         List<Task> tasks;
         Task mergeTask;
@@ -81,6 +82,10 @@ namespace YoutubeDL
             cbChannel.SelectedIndex = 0;
 
             txtPath.Text = download_path;
+        }
+        private void frmYoutube_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            frmManageVideo.CloseInstance();
         }
 
         private void lvVideo_Click(object sender, EventArgs e)
@@ -180,8 +185,14 @@ namespace YoutubeDL
             currentVid = (DownloadVid)lvDownload.SelectedObjects[0];
             Clipboard.SetText(YoutubeLink + currentVid.vid);
         }
+        private void lvDownload_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
+        {
+            DownloadVid vid = (DownloadVid)e.Model;
+            e.Item.ForeColor = vid.downloadstatus == 3 ? Color.Red : colorStatus[vid.status];
+            e.Item.BackColor = (vid.downloadstatus == 2) ? Color.LightBlue : Color.Transparent;
+        }
 
-        private void olvDownload_Dropped(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
+        private void lvDownload_Dropped(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
         {
             lvDownload.DeselectAll();
 
@@ -200,7 +211,7 @@ namespace YoutubeDL
             lvDownload.Items[lvDownload.Items.Count - 1].EnsureVisible();
             lvDownload.Items[lvDownload.Items.Count - 1].Selected = true;
         }
-        private void olvDownload_CanDrop(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
+        private void lvDownload_CanDrop(object sender, BrightIdeasSoftware.OlvDropEventArgs e)
         {
             if (((DataObject)e.DataObject).GetDataPresent(DataFormats.Text))
                 e.Effect = DragDropEffects.Copy;
@@ -310,8 +321,8 @@ namespace YoutubeDL
                         SetStatusSuccess("Merging video success.");
                         btnMerge.Text = "Merge";
                     }
-                        , TaskScheduler.FromCurrentSynchronizationContext()
-                    );
+                    , TaskScheduler.FromCurrentSynchronizationContext()
+                );
             }
         }
         private void btnAutoSelect_Click(object sender, EventArgs e)
@@ -604,6 +615,25 @@ namespace YoutubeDL
             vid.size = vF.FileSize + aF.FileSize;
             vid.status = 2;
         }
+        void LoadVideoChannel(int channel_id, string group)
+        {
+            lvDownload.BeginUpdate();
+
+            var listVid = repos.LoadDownloadVideo(channel_id, group, false);
+            lvDownload.SetObjects(listVid);
+
+            lvDownload.EndUpdate();
+
+            // load group list to combobox
+            if (channel_id == 0)
+            {
+                cbGroup.Items.Clear();
+                cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+            }
+
+            lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
+                    .ToString("0.00") + " MB");
+        }
 
         IAsyncResult BeginAsync(Action action, string beginText, string endText)
         {
@@ -630,26 +660,6 @@ namespace YoutubeDL
         {
             lbStatus.BackColor = Color.DodgerBlue;
             lbStatus.Text = text;
-        }
-
-        void LoadVideoChannel(int channel_id, string group)
-        {
-            lvDownload.BeginUpdate();
-
-            var listVid = repos.LoadDownloadVideo(channel_id, group, false);
-            lvDownload.SetObjects(listVid);
-
-            lvDownload.EndUpdate();
-
-            // load group list to combobox
-            if (channel_id == 0)
-            {
-                cbGroup.Items.Clear();
-                cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
-            }
-
-            lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
-                    .ToString("0.00") + " MB");
         }
 
         private void btnChangePath_Click(object sender, EventArgs e)
@@ -716,21 +726,7 @@ namespace YoutubeDL
         }
         private void btnVidMan_Click(object sender, EventArgs e)
         {
-            frmManageVideo frm = new frmManageVideo();
-            frm.Show();
-        }
-        private void olvDownload_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
-        {
-            DownloadVid vid = (DownloadVid)e.Model;
-            e.Item.ForeColor = vid.downloadstatus == 3 ? Color.Red : colorStatus[vid.status];
-            e.Item.BackColor = (vid.downloadstatus == 2) ? Color.LightBlue : Color.Transparent;
-        }
-        private void frmYoutube_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            for (int i = 0; i < Application.OpenForms.Count; ++i)
-            {
-                if (Application.OpenForms[i] != this) Application.OpenForms[i].Close();
-            }
+            frmManageVideo.ShowInstance();
         }
     }
 }

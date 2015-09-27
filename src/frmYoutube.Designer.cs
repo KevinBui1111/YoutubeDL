@@ -334,9 +334,9 @@
             this.lvDownload.UseCompatibleStateImageBehavior = false;
             this.lvDownload.View = System.Windows.Forms.View.Details;
             this.lvDownload.VirtualMode = true;
-            this.lvDownload.CanDrop += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.olvDownload_CanDrop);
-            this.lvDownload.Dropped += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.olvDownload_Dropped);
-            this.lvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
+            this.lvDownload.CanDrop += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.lvDownload_CanDrop);
+            this.lvDownload.Dropped += new System.EventHandler<BrightIdeasSoftware.OlvDropEventArgs>(this.lvDownload_Dropped);
+            this.lvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.lvDownload_FormatRow);
             this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
             this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
             // 
@@ -417,7 +417,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.2 build 16/09/2015";
+            this.Text = "YoutubeDL v2.3 build 27/09/2015";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SQLite;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using YoutubeDL.Properties;
@@ -18,11 +21,6 @@ namespace YoutubeDL.Models
             db = new SQLiteDatabase(connectionString);
 
             script = new StringBuilder();
-        }
-
-        internal void DeleteVid(string vid)
-        {
-            db.ExecuteNonQuery(string.Format("DELETE FROM video WHERE vid = '{0}'", vid));
         }
 
         internal void BeginUpdate(){
@@ -48,29 +46,6 @@ namespace YoutubeDL.Models
                 name = (string)r["name"],
                 folder = (string)r["folder"]
             }).ToArray();
-        }
-
-        internal void _UpdateFormat(DownloadVid c)
-        {
-            KeyValuePair<string, object>[] parameters = new KeyValuePair<string,object>[]{
-                new KeyValuePair<string, object>("vidFID", c.vidFID),
-                new KeyValuePair<string, object>("vidUrl", c.vidUrl),
-                new KeyValuePair<string, object>("vidFilename", c.vidFilename),
-                new KeyValuePair<string, object>("vidSize", c.vidSize),
-
-                new KeyValuePair<string, object>("audFID", c.audFID),
-                new KeyValuePair<string, object>("audUrl", c.audUrl),
-                new KeyValuePair<string, object>("audFilename", c.audFilename),
-                new KeyValuePair<string, object>("audSize", c.audSize),
-
-                new KeyValuePair<string, object>("resolution", c.resolution),
-                new KeyValuePair<string, object>("ext", c.ext),
-                new KeyValuePair<string, object>("filename", c.filename),
-                new KeyValuePair<string, object>("size", c.size),
-                new KeyValuePair<string, object>("status", c.status),
-            };
-
-            db.Update("video", parameters, string.Format("vid = '{0}'", c.vid));
         }
 
         internal void Insert(DownloadVid c)
@@ -153,21 +128,9 @@ namespace YoutubeDL.Models
 
             if (!begin_update) Commit();
         }
-
-        internal void _UpdateNewField(DownloadVid c)
+        internal void DeleteVid(string vid)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_NEWFIELD,
-                SQLiteDatabase.NormalizeParam(c.vid),
-
-                SQLiteDatabase.NormalizeParam(c.filename),
-                SQLiteDatabase.NormalizeParam(c.group),
-                SQLiteDatabase.NormalizeParam(c.fps60 ? 1 : 0),
-                SQLiteDatabase.NormalizeParam(c.date_add),
-                SQLiteDatabase.NormalizeParam(c.date_format),
-                SQLiteDatabase.NormalizeParam(c.date_merge)
-            ));
-
-            if (!begin_update) Commit();
+            db.ExecuteNonQuery(string.Format("DELETE FROM video WHERE vid = '{0}'", vid));
         }
 
         internal DownloadVid[] LoadDownloadVideo(int channel_id, string group, bool showCompleted)
@@ -226,6 +189,61 @@ namespace YoutubeDL.Models
                 group = r["group"] is DBNull ? null : (string)r["group"],
                 channel_id = r["channel_id"] is DBNull ? 0 : Convert.ToInt32(r["channel_id"]),
             }).ToArray();
+        }
+
+        internal void SaveImage(string vid, byte[] imagen)
+        {
+            SQLiteConnection con = new SQLiteConnection("Data Source=imagelist.db");
+            SQLiteCommand cmd = new SQLiteCommand("INSERT INTO image (key, imagebin) VALUES (@p0, @p1);"
+                , con);
+            cmd.Parameters.Add(new SQLiteParameter("@p0", vid));
+            cmd.Parameters.Add(new SQLiteParameter("@p1", imagen));
+            con.Open();
+            cmd.ExecuteNonQuery();
+            con.Close();
+        }
+        internal List<FlatImage> LoadImage()
+        {
+            List<FlatImage> list = new List<FlatImage>();
+
+            SQLiteConnection con = new SQLiteConnection("Data Source=imagelist.db");
+            SQLiteCommand cmd = new SQLiteCommand("SELECT * FROM image;", con);
+            con.Open();
+            IDataReader rdr = cmd.ExecuteReader();
+            while (rdr.Read())
+            {
+                list.Add(new FlatImage
+                {
+                    _key = (string)rdr[0],
+                    _image = Helper.ByteToImage((System.Byte[])rdr[1])
+                });
+            }
+            con.Close();
+
+            return list;
+        }
+
+        internal void _UpdateFormat(DownloadVid c)
+        {
+            KeyValuePair<string, object>[] parameters = new KeyValuePair<string, object>[]{
+                new KeyValuePair<string, object>("vidFID", c.vidFID),
+                new KeyValuePair<string, object>("vidUrl", c.vidUrl),
+                new KeyValuePair<string, object>("vidFilename", c.vidFilename),
+                new KeyValuePair<string, object>("vidSize", c.vidSize),
+
+                new KeyValuePair<string, object>("audFID", c.audFID),
+                new KeyValuePair<string, object>("audUrl", c.audUrl),
+                new KeyValuePair<string, object>("audFilename", c.audFilename),
+                new KeyValuePair<string, object>("audSize", c.audSize),
+
+                new KeyValuePair<string, object>("resolution", c.resolution),
+                new KeyValuePair<string, object>("ext", c.ext),
+                new KeyValuePair<string, object>("filename", c.filename),
+                new KeyValuePair<string, object>("size", c.size),
+                new KeyValuePair<string, object>("status", c.status),
+            };
+
+            db.Update("video", parameters, string.Format("vid = '{0}'", c.vid));
         }
     }
 }
