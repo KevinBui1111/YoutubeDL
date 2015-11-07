@@ -417,7 +417,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.3 build 27/09/2015";
+            this.Text = "YoutubeDL v2.34 build 07/11/2015";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();

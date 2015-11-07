@@ -274,9 +274,9 @@ namespace YoutubeDL
             string idm_format = "-a /d {0} /p \"{1}\" /f \"{2}\"";
 
             repos.BeginUpdate();
-            foreach (var vid in itemDown)
+            foreach (var vid in itemDown.ToArray())
             {
-                if (vid.status != 2) continue;
+                if (vid.status != 2 && vid.status != 3) continue;
 
                 var p = new Process
                 {
@@ -300,8 +300,11 @@ namespace YoutubeDL
                 p.WaitForExit();
                 p.Close();
 
-                vid.status = 3;
-                repos.UpdateStatus(vid);
+                if (vid.status != 3)
+                {
+                    vid.status = 3;
+                    repos.UpdateStatus(vid);
+                }
                 lvDownload.RefreshObject(vid);
             }
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
@@ -459,13 +462,13 @@ namespace YoutubeDL
         }
         void task_merging(CancellationToken token)
         {
-            foreach (DownloadVid vid in lvDownload.Objects)
+            foreach (DownloadVid vid in lvDownload.Objects.Cast<DownloadVid>().ToArray())
             {
                 if (token.IsCancellationRequested) return;
 
                 if (vid.status != 3) continue;
 
-                lvDownload.EnsureModelVisible(vid);
+                this.Invoke((MethodInvoker)delegate { lvDownload.EnsureModelVisible(vid); });
 
                 var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
                 var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
@@ -505,8 +508,11 @@ namespace YoutubeDL
 
                 if (exitcode != 0 || File.Exists(desFilename) == false)
                 {
-                    var frmLog = frmYTLog.GetInstance(this);
-                    frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        var frmLog = frmYTLog.GetInstance(this);
+                        frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
+                    });
                 }
                 else
                 {

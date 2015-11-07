@@ -50,7 +50,22 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
-            FlatImage.Deserialize(imageList1, imagecachePath);
+            Task task = Task.Factory.StartNew(() =>
+                {
+                    List<FlatImage> ilc = repos.LoadImage();
+
+                    for (int index = 0; index < ilc.Count; index++)
+                    {
+                        Image i = ilc[index]._image;
+                        string key = ilc[index]._key;
+                        this.Invoke(new Action(() =>
+                        {
+                            imageList1.Images.Add(key, i);
+                            Application.DoEvents();
+                        }));
+                    }
+                });
+            //FlatImage.Deserialize(imageList1, imagecachePath);
 
             queueVidNeedLoad = new BlockingCollection<DownloadVid>();
 
@@ -66,7 +81,7 @@ namespace YoutubeDL
                 var vid = (DownloadVid)row;
                 string key = vid.vid;
 
-                if (!olvDownload.LargeImageList.Images.ContainsKey(key))
+                if (task.IsCompleted && !olvDownload.LargeImageList.Images.ContainsKey(key))
                     queueVidNeedLoad.Add(vid);
 
                 return key;
@@ -347,6 +362,7 @@ namespace YoutubeDL
                 Image i = ilc[index]._image;
                 string key = ilc[index]._key;
                 imglist.Images.Add(key, i);
+                Application.DoEvents();
             }
         }
     }
