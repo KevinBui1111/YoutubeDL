@@ -43,7 +43,6 @@
             this.btnClick = new System.Windows.Forms.Button();
             this.btnLoadVid = new System.Windows.Forms.Button();
             this.btnMerge = new System.Windows.Forms.Button();
-            this.ckAutoparse = new System.Windows.Forms.CheckBox();
             this.cbGroup = new System.Windows.Forms.ComboBox();
             this.btnAutoSelect = new System.Windows.Forms.Button();
             this.lbStatus = new System.Windows.Forms.Label();
@@ -63,6 +62,8 @@
             this.olvColSize = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn8 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColDate = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
+            this.btnYtdl = new System.Windows.Forms.Button();
+            this.btnMp4Format = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).BeginInit();
             this.SuspendLayout();
             // 
@@ -89,10 +90,10 @@
             this.lvVideo.FullRowSelect = true;
             this.lvVideo.GridLines = true;
             this.lvVideo.HideSelection = false;
-            this.lvVideo.Location = new System.Drawing.Point(12, 129);
+            this.lvVideo.Location = new System.Drawing.Point(12, 139);
             this.lvVideo.MultiSelect = false;
             this.lvVideo.Name = "lvVideo";
-            this.lvVideo.Size = new System.Drawing.Size(285, 299);
+            this.lvVideo.Size = new System.Drawing.Size(285, 289);
             this.lvVideo.TabIndex = 1;
             this.lvVideo.UseCompatibleStateImageBehavior = false;
             this.lvVideo.View = System.Windows.Forms.View.Details;
@@ -195,22 +196,12 @@
             this.btnMerge.UseVisualStyleBackColor = true;
             this.btnMerge.Click += new System.EventHandler(this.btnMerge_Click);
             // 
-            // ckAutoparse
-            // 
-            this.ckAutoparse.AutoSize = true;
-            this.ckAutoparse.Location = new System.Drawing.Point(214, 73);
-            this.ckAutoparse.Name = "ckAutoparse";
-            this.ckAutoparse.Size = new System.Drawing.Size(83, 19);
-            this.ckAutoparse.TabIndex = 2;
-            this.ckAutoparse.Text = "Auto parse";
-            this.ckAutoparse.UseVisualStyleBackColor = true;
-            // 
             // cbGroup
             // 
             this.cbGroup.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
             this.cbGroup.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cbGroup.FormattingEnabled = true;
-            this.cbGroup.Location = new System.Drawing.Point(12, 45);
+            this.cbGroup.Location = new System.Drawing.Point(139, 15);
             this.cbGroup.Name = "cbGroup";
             this.cbGroup.Size = new System.Drawing.Size(79, 23);
             this.cbGroup.TabIndex = 3;
@@ -218,11 +209,11 @@
             // 
             // btnAutoSelect
             // 
-            this.btnAutoSelect.Location = new System.Drawing.Point(167, 12);
+            this.btnAutoSelect.Location = new System.Drawing.Point(117, 44);
             this.btnAutoSelect.Name = "btnAutoSelect";
-            this.btnAutoSelect.Size = new System.Drawing.Size(130, 27);
+            this.btnAutoSelect.Size = new System.Drawing.Size(80, 27);
             this.btnAutoSelect.TabIndex = 4;
-            this.btnAutoSelect.Text = "Auto select format";
+            this.btnAutoSelect.Text = "Auto format";
             this.btnAutoSelect.UseVisualStyleBackColor = true;
             this.btnAutoSelect.Click += new System.EventHandler(this.btnAutoSelect_Click);
             // 
@@ -250,7 +241,7 @@
             // 
             // txtPath
             // 
-            this.txtPath.Location = new System.Drawing.Point(12, 100);
+            this.txtPath.Location = new System.Drawing.Point(12, 110);
             this.txtPath.Name = "txtPath";
             this.txtPath.ReadOnly = true;
             this.txtPath.Size = new System.Drawing.Size(253, 23);
@@ -259,7 +250,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 82);
+            this.label1.Location = new System.Drawing.Point(12, 89);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 15);
             this.label1.TabIndex = 8;
@@ -269,7 +260,7 @@
             // 
             this.btnChangePath.AutoSize = true;
             this.btnChangePath.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnChangePath.Location = new System.Drawing.Point(271, 98);
+            this.btnChangePath.Location = new System.Drawing.Point(271, 108);
             this.btnChangePath.Name = "btnChangePath";
             this.btnChangePath.Size = new System.Drawing.Size(26, 25);
             this.btnChangePath.TabIndex = 9;
@@ -289,7 +280,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(99, 44);
+            this.button1.Location = new System.Drawing.Point(201, 77);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(96, 27);
             this.button1.TabIndex = 10;
@@ -339,6 +330,7 @@
             this.lvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.lvDownload_FormatRow);
             this.lvDownload.Click += new System.EventHandler(this.lvDownload_Click);
             this.lvDownload.DoubleClick += new System.EventHandler(this.lvDownload_DoubleClick);
+            this.lvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lvDownload_KeyUp);
             // 
             // olvColumn1
             // 
@@ -393,12 +385,33 @@
             this.olvColDate.AspectName = "date_format";
             this.olvColDate.Text = "Date format";
             // 
+            // btnYtdl
+            // 
+            this.btnYtdl.Location = new System.Drawing.Point(117, 77);
+            this.btnYtdl.Name = "btnYtdl";
+            this.btnYtdl.Size = new System.Drawing.Size(80, 27);
+            this.btnYtdl.TabIndex = 10;
+            this.btnYtdl.Text = "Youtube-dl";
+            this.btnYtdl.UseVisualStyleBackColor = true;
+            this.btnYtdl.Click += new System.EventHandler(this.btnYtdl_Click);
+            // 
+            // btnMp4Format
+            // 
+            this.btnMp4Format.Location = new System.Drawing.Point(31, 44);
+            this.btnMp4Format.Name = "btnMp4Format";
+            this.btnMp4Format.Size = new System.Drawing.Size(80, 27);
+            this.btnMp4Format.TabIndex = 4;
+            this.btnMp4Format.Text = "Auto format";
+            this.btnMp4Format.UseVisualStyleBackColor = true;
+            this.btnMp4Format.Click += new System.EventHandler(this.btnMp4Format_Click);
+            // 
             // frmYoutube
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(681, 461);
             this.Controls.Add(this.lvDownload);
+            this.Controls.Add(this.btnYtdl);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnCheckFormat);
             this.Controls.Add(this.btnChangePath);
@@ -406,9 +419,9 @@
             this.Controls.Add(this.txtPath);
             this.Controls.Add(this.cbChannel);
             this.Controls.Add(this.lbStatus);
+            this.Controls.Add(this.btnMp4Format);
             this.Controls.Add(this.btnAutoSelect);
             this.Controls.Add(this.cbGroup);
-            this.Controls.Add(this.ckAutoparse);
             this.Controls.Add(this.lvVideo);
             this.Controls.Add(this.btnClick);
             this.Controls.Add(this.btnMerge);
@@ -417,7 +430,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.34 build 07/11/2015";
+            this.Text = "YoutubeDL v2.4 build 08/11/2015";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();
@@ -443,7 +456,6 @@
         private System.Windows.Forms.Button btnClick;
         private System.Windows.Forms.Button btnLoadVid;
         private System.Windows.Forms.Button btnMerge;
-        private System.Windows.Forms.CheckBox ckAutoparse;
         private System.Windows.Forms.ComboBox cbGroup;
         private System.Windows.Forms.Button btnAutoSelect;
         private System.Windows.Forms.Label lbStatus;
@@ -463,5 +475,7 @@
         private BrightIdeasSoftware.OLVColumn olvColumn8;
         private BrightIdeasSoftware.OLVColumn olvColDate;
         private BrightIdeasSoftware.OLVColumn olvColGroup;
+        private System.Windows.Forms.Button btnYtdl;
+        private System.Windows.Forms.Button btnMp4Format;
     }
 }

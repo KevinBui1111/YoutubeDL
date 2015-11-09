@@ -20,8 +20,8 @@ namespace YoutubeDL
     {
         const string namePattern = "[\\\\/?:*\"><|]",
             file_name_format = "{0}_{1}.{2}",
-            ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"",
-            YoutubeLink = "https://www.youtube.com/watch?v=";
+            ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
+        public const string YoutubeLink = "https://www.youtube.com/watch?v=";
 
         RepositoryLite repos;
         DownloadVid currentVid;
@@ -733,6 +733,36 @@ namespace YoutubeDL
         private void btnVidMan_Click(object sender, EventArgs e)
         {
             frmManageVideo.ShowInstance();
+        }
+
+        private void btnYtdl_Click(object sender, EventArgs e)
+        {
+            frmYTdl.ShowInstance();
+        }
+
+        private void btnMp4Format_Click(object sender, EventArgs e)
+        {
+            var itemParse = lvDownload.Objects
+                .Cast<DownloadVid>()
+                .Where(vid => vid.status >= 1)
+                .ToArray();
+
+            List<string> strange = new List<string>();
+            foreach (var vid in itemParse)
+            {
+                var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
+                var vidformat = vidInfo.Formats.Where(f => f.Format_Note == "DASH video");
+                var maxw = vidformat.Max(f => f.Width);
+                var maxMp4 = vidformat.Where(f => f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
+
+                if (maxMp4.Width != maxw)
+                    strange.Add(vid.vid);
+            }
+
+            if (strange.Count > 0)
+            {
+                MessageBox.Show(string.Join("\n", strange));
+            }
         }
     }
 }
