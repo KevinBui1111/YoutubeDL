@@ -177,8 +177,12 @@ namespace YoutubeDL
         }
         private void olvDownload_CellRightClick(object sender, CellRightClickEventArgs e)
         {
-            var vid = (DownloadVid)e.Model;
-            if (vid != null) Clipboard.SetText(vid.title);
+            //var vid = (DownloadVid)e.Model;
+            //if (vid != null) Clipboard.SetText(vid.title);
+            if (olvDownload.SelectedObjects.Count > 0)
+                Clipboard.SetText(
+                    string.Join(Environment.NewLine, olvDownload.SelectedObjects.Cast<DownloadVid>().Select(d => d.filename))
+                );
         }
 
         private void btnRemoveMissing_Click(object sender, EventArgs e)
@@ -344,6 +348,36 @@ namespace YoutubeDL
                 g.DrawImage(b, left, top, newW, newH);
             return result;
         }
+
+        private void btnRename_Click(object sender, EventArgs e)
+        {
+            var newfilenames = Clipboard.GetText().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var vids = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
+            if (vids.Length != newfilenames.Length)
+                MessageBox.Show("Unmatch number of file!");
+            else
+            {
+                for (int i = 0; i < vids.Length; ++i)
+                {
+                    var oldname = getFullfilename(vids[i]);
+                    vids[i].filename = newfilenames[i];
+                    var newname = getFullfilename(vids[i]);
+
+                    try{
+                        File.Move(oldname, newname);
+                        repos.UpdateFilename(vids[i]);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(vids[i].vid + Environment.NewLine + ex.Message);
+                    }
+                }
+
+                olvDownload.RefreshObjects(olvDownload.SelectedObjects);
+            }
+        }
+
+
     }
 
     [Serializable()]

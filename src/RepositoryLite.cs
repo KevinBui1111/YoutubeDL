@@ -245,5 +245,15 @@ namespace YoutubeDL.Models
 
             db.Update("video", parameters, string.Format("vid = '{0}'", c.vid));
         }
+
+        internal void UpdateFilename(DownloadVid c)
+        {
+            script.AppendLine(string.Format(Resources.UPDATE_FILENAME,
+                SQLiteDatabase.NormalizeParam(c.vid),
+                SQLiteDatabase.NormalizeParam(c.filename)
+            ));
+
+            if (!begin_update) Commit();
+        }
     }
 }

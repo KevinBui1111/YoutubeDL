@@ -121,6 +121,17 @@ namespace YoutubeDL.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to UPDATE video
+        ///SET filename = {1}
+        ///WHERE vid = {0};.
+        /// </summary>
+        internal static string UPDATE_FILENAME {
+            get {
+                return ResourceManager.GetString("UPDATE_FILENAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UPDATE video 
         ///SET vidFID = {1},
         ///    vidURL = {2},

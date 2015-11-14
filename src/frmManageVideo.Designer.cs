@@ -45,6 +45,7 @@
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.ckThumbview = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).BeginInit();
             this.SuspendLayout();
             // 
@@ -129,8 +130,8 @@
             this.olvDownload.AllColumns.Add(this.olvColumn4);
             this.olvDownload.AllColumns.Add(this.olvColFolder);
             this.olvDownload.AllColumns.Add(this.olvColumn6);
-            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
@@ -210,6 +211,16 @@
             this.ckThumbview.UseVisualStyleBackColor = true;
             this.ckThumbview.CheckedChanged += new System.EventHandler(this.ckThumbview_CheckedChanged);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(367, 37);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(108, 25);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "Rename";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.btnRename_Click);
+            // 
             // frmManageVideo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -218,6 +229,7 @@
             this.Controls.Add(this.ckThumbview);
             this.Controls.Add(this.olvDownload);
             this.Controls.Add(this.ckCompletedVideo);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnWrongDel);
             this.Controls.Add(this.lbStatus);
             this.Controls.Add(this.btnRemoveMissing);
@@ -253,5 +265,6 @@
         private BrightIdeasSoftware.OLVColumn olvColumn6;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.CheckBox ckThumbview;
+        private System.Windows.Forms.Button button1;
     }
 }

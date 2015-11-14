@@ -152,7 +152,7 @@ namespace YoutubeDL
                 try
                 {
                     ListViewItem item = new ListViewItem(new string[]{
-                        f.Format_Id, f.Width + " x " + f.Height, f.Ext, f.Fps > 30 ? f.Fps.ToString() : null, (1.0 * f.FileSize / 1024 / 1024).Value.ToString("0.00") + " MB"
+                        f.Format_Id, f.Width + " x " + f.Height, f.Ext, f.Fps > 30 ? f.Fps.ToString() : null, (f.FileSize * 8.0 / vidInfo.Duration / 1024 / 1024).Value.ToString("0.##") + "Mbps", f.FileSize.ToReadableSize()
                     });
                     item.Name = f.Format_Id;
                     item.Tag = f;
@@ -169,7 +169,7 @@ namespace YoutubeDL
             foreach (Formats f in audFormats)
             {
                 ListViewItem item = new ListViewItem(new string[]{
-                    f.Format_Id, f.Ext, f.Abr.ToString(), (1.0 * f.FileSize / 1024 / 1024).Value.ToString("0.00") + " MB"
+                    f.Format_Id, f.Ext, f.Abr.ToString(), f.FileSize.ToReadableSize()
                 });
                 item.Name = f.Format_Id;
                 item.Tag = f;
@@ -336,7 +336,7 @@ namespace YoutubeDL
             else
                 itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
-            long diffSize = 50 * 1024 * 1024;
+            //long diffSize = 50 * 1024 * 1024;
 
             repos.BeginUpdate();
             lvDownload.BeginUpdate();
@@ -346,15 +346,15 @@ namespace YoutubeDL
                 var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
                 if (vidInfo == null) continue;
 
-                var maxWebm = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "webm").OrderByDescending(f => f.FileSize).FirstOrDefault();
+                //var maxWebm = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "webm").OrderByDescending(f => f.FileSize).FirstOrDefault();
                 var maxMp4 = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
 
-                Formats vF;
+                Formats vF = maxMp4;
 
-                if (maxWebm == null) vF = maxMp4;
-                else if (maxMp4 == null) vF = maxWebm;
-                else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
-                else vF = maxMp4;
+                //if (maxWebm == null) vF = maxMp4;
+                //else if (maxMp4 == null) vF = maxWebm;
+                //else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
+                //else vF = maxMp4;
 
                 var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
                 if (aF == null)
@@ -464,6 +464,7 @@ namespace YoutubeDL
         {
             foreach (DownloadVid vid in lvDownload.Objects.Cast<DownloadVid>().ToArray())
             {
+                //continue;
                 if (token.IsCancellationRequested) return;
 
                 if (vid.status != 3) continue;

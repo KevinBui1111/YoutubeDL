@@ -35,6 +35,7 @@
             this.colCodec = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colFps = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colSize = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lvAudio = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -86,7 +87,8 @@
             this.colRes,
             this.colCodec,
             this.colFps,
-            this.colSize});
+            this.colSize,
+            this.columnHeader2});
             this.lvVideo.FullRowSelect = true;
             this.lvVideo.GridLines = true;
             this.lvVideo.HideSelection = false;
@@ -123,9 +125,13 @@
             // 
             // colSize
             // 
-            this.colSize.Text = "Size";
+            this.colSize.Text = "Mbps";
             this.colSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.colSize.Width = 78;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Size";
             // 
             // lvAudio
             // 
@@ -401,7 +407,7 @@
             this.btnMp4Format.Name = "btnMp4Format";
             this.btnMp4Format.Size = new System.Drawing.Size(80, 27);
             this.btnMp4Format.TabIndex = 4;
-            this.btnMp4Format.Text = "Auto format";
+            this.btnMp4Format.Text = "Check Mp4";
             this.btnMp4Format.UseVisualStyleBackColor = true;
             this.btnMp4Format.Click += new System.EventHandler(this.btnMp4Format_Click);
             // 
@@ -430,7 +436,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.4 build 08/11/2015";
+            this.Text = "YoutubeDL v2.6 build 14/11/2015";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();
@@ -477,5 +483,6 @@
         private BrightIdeasSoftware.OLVColumn olvColGroup;
         private System.Windows.Forms.Button btnYtdl;
         private System.Windows.Forms.Button btnMp4Format;
+        private System.Windows.Forms.ColumnHeader columnHeader2;
     }
 }
