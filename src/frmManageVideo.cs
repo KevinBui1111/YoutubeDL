@@ -24,9 +24,9 @@ namespace YoutubeDL
         RepositoryLite repos = new RepositoryLite();
         Dictionary<int, Channel> dicChannel;
         int new_channel_id;
-        const string vidFolder = @"i:\YDL\",
-                imagecachePath = @"ImageList.bin";
+        const string vidFolder = @"i:\YDL\";
         BlockingCollection<DownloadVid> queueVidNeedLoad;
+        Dictionary<string, Image> dicImage = new Dictionary<string, Image>();
 
         static frmManageVideo openForm = null;
         // No need for locking - you'll be doing all this on the UI thread...
@@ -50,25 +50,9 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
-            Task task = Task.Factory.StartNew(() =>
-                {
-                    List<FlatImage> ilc = repos.LoadImage();
-
-                    for (int index = 0; index < ilc.Count; index++)
-                    {
-                        Image i = ilc[index]._image;
-                        string key = ilc[index]._key;
-                        this.Invoke(new Action(() =>
-                        {
-                            imageList1.Images.Add(key, i);
-                            Application.DoEvents();
-                        }));
-                    }
-                });
-            //FlatImage.Deserialize(imageList1, imagecachePath);
+            repos.LoadImage().ForEach(f => dicImage[f._key] = f._image);
 
             queueVidNeedLoad = new BlockingCollection<DownloadVid>();
-
             Task.Factory.StartNew(bwLoadImage_DoWork);
             Task.Factory.StartNew(bwLoadImage_DoWork);
             Task.Factory.StartNew(bwLoadImage_DoWork);
@@ -79,12 +63,11 @@ namespace YoutubeDL
             this.olvColumn1.ImageGetter = delegate(object row)
             {
                 var vid = (DownloadVid)row;
-                string key = vid.vid;
 
-                if (task.IsCompleted && !olvDownload.LargeImageList.Images.ContainsKey(key))
+                if (!imageList1.Images.ContainsKey(vid.vid))
                     queueVidNeedLoad.Add(vid);
 
-                return key;
+                return vid.vid;
             };
             olvColumn1.AspectGetter = delegate(object rowObject)
             {
@@ -271,6 +254,12 @@ namespace YoutubeDL
             else
             {
                 DownloadVid vid;
+                imageList1.Images.Clear();
+                foreach (var v in listVid)
+                {
+                    if (dicImage.ContainsKey(v.vid))
+                        imageList1.Images.Add(v.vid, dicImage[v.vid]);
+                }
 
                 while (queueVidNeedLoad.TryTake(out vid)) ;
                 olvDownload.SetObjects(listVid);
@@ -321,10 +310,8 @@ namespace YoutubeDL
 
         void AddToImageList(string key, Image img)
         {
-            if (olvDownload.InvokeRequired)
-                olvDownload.Invoke(new Action(() => AddToImageList(key, img)));
-            else
-                imageList1.Images.Add(key, img);
+            dicImage.Add(key, img);
+            olvDownload.Invoke(new Action(() => imageList1.Images.Add(key, img)));
 
         }
         Image ResizeBitmap(Bitmap b, int nSize)
