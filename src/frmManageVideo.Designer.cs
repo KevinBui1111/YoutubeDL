@@ -36,16 +36,17 @@
             this.btnWrongDel = new System.Windows.Forms.Button();
             this.ckCompletedVideo = new System.Windows.Forms.CheckBox();
             this.cbColornew = new System.Windows.Forms.ComboBox();
-            this.olvDownload = new BrightIdeasSoftware.ObjectListView();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.ckThumbview = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.olvColumn1 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn2 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColSize = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn4 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColFolder = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.ckThumbview = new System.Windows.Forms.CheckBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.olvDownload = new BrightIdeasSoftware.ObjectListView();
+            this.txtAfter = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).BeginInit();
             this.SuspendLayout();
             // 
@@ -85,7 +86,7 @@
             // 
             this.lbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lbStatus.AutoSize = true;
-            this.lbStatus.Location = new System.Drawing.Point(12, 508);
+            this.lbStatus.Location = new System.Drawing.Point(12, 785);
             this.lbStatus.Name = "lbStatus";
             this.lbStatus.Size = new System.Drawing.Size(38, 15);
             this.lbStatus.TabIndex = 10;
@@ -117,47 +118,37 @@
             // 
             this.cbColornew.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbColornew.FormattingEnabled = true;
-            this.cbColornew.Location = new System.Drawing.Point(161, 39);
+            this.cbColornew.Location = new System.Drawing.Point(261, 39);
             this.cbColornew.Name = "cbColornew";
             this.cbColornew.Size = new System.Drawing.Size(100, 23);
             this.cbColornew.TabIndex = 8;
             // 
-            // olvDownload
+            // imageList1
             // 
-            this.olvDownload.AllColumns.Add(this.olvColumn1);
-            this.olvDownload.AllColumns.Add(this.olvColumn2);
-            this.olvDownload.AllColumns.Add(this.olvColSize);
-            this.olvDownload.AllColumns.Add(this.olvColumn4);
-            this.olvDownload.AllColumns.Add(this.olvColFolder);
-            this.olvDownload.AllColumns.Add(this.olvColumn6);
-            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.olvColumn1,
-            this.olvColumn2,
-            this.olvColSize,
-            this.olvColumn4,
-            this.olvColFolder,
-            this.olvColumn6});
-            this.olvDownload.FullRowSelect = true;
-            this.olvDownload.GridLines = true;
-            this.olvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.olvDownload.HideSelection = false;
-            this.olvDownload.IsSimpleDragSource = true;
-            this.olvDownload.LargeImageList = this.imageList1;
-            this.olvDownload.Location = new System.Drawing.Point(12, 68);
-            this.olvDownload.Name = "olvDownload";
-            this.olvDownload.ShowGroups = false;
-            this.olvDownload.Size = new System.Drawing.Size(535, 437);
-            this.olvDownload.TabIndex = 13;
-            this.olvDownload.UseCompatibleStateImageBehavior = false;
-            this.olvDownload.View = System.Windows.Forms.View.Details;
-            this.olvDownload.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.olvDownload_CellRightClick);
-            this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
-            this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
-            this.olvDownload.DoubleClick += new System.EventHandler(this.olvDownload_DoubleClick);
-            this.olvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.olvDownload_KeyUp);
+            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageList1.ImageSize = new System.Drawing.Size(128, 128);
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            // 
+            // ckThumbview
+            // 
+            this.ckThumbview.AutoSize = true;
+            this.ckThumbview.Location = new System.Drawing.Point(161, 43);
+            this.ckThumbview.Name = "ckThumbview";
+            this.ckThumbview.Size = new System.Drawing.Size(92, 19);
+            this.ckThumbview.TabIndex = 14;
+            this.ckThumbview.Text = "Thumb view";
+            this.ckThumbview.UseVisualStyleBackColor = true;
+            this.ckThumbview.CheckedChanged += new System.EventHandler(this.ckThumbview_CheckedChanged);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(481, 10);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(108, 25);
+            this.button1.TabIndex = 11;
+            this.button1.Text = "Rename";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.btnRename_Click);
             // 
             // olvColumn1
             // 
@@ -194,38 +185,56 @@
             this.olvColumn6.AspectName = "vid";
             this.olvColumn6.Text = "VID";
             // 
-            // imageList1
+            // olvDownload
             // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(128, 128);
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.olvDownload.AllColumns.Add(this.olvColumn1);
+            this.olvDownload.AllColumns.Add(this.olvColumn2);
+            this.olvDownload.AllColumns.Add(this.olvColSize);
+            this.olvDownload.AllColumns.Add(this.olvColumn4);
+            this.olvDownload.AllColumns.Add(this.olvColFolder);
+            this.olvDownload.AllColumns.Add(this.olvColumn6);
+            this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.olvColumn1,
+            this.olvColumn2,
+            this.olvColSize,
+            this.olvColumn4,
+            this.olvColFolder,
+            this.olvColumn6});
+            this.olvDownload.FullRowSelect = true;
+            this.olvDownload.GridLines = true;
+            this.olvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.olvDownload.HideSelection = false;
+            this.olvDownload.IsSimpleDragSource = true;
+            this.olvDownload.LargeImageList = this.imageList1;
+            this.olvDownload.Location = new System.Drawing.Point(12, 68);
+            this.olvDownload.Name = "olvDownload";
+            this.olvDownload.ShowGroups = false;
+            this.olvDownload.Size = new System.Drawing.Size(713, 714);
+            this.olvDownload.TabIndex = 13;
+            this.olvDownload.UseCompatibleStateImageBehavior = false;
+            this.olvDownload.View = System.Windows.Forms.View.Details;
+            this.olvDownload.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.olvDownload_CellRightClick);
+            this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
+            this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
+            this.olvDownload.DoubleClick += new System.EventHandler(this.olvDownload_DoubleClick);
+            this.olvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.olvDownload_KeyUp);
             // 
-            // ckThumbview
+            // txtAfter
             // 
-            this.ckThumbview.AutoSize = true;
-            this.ckThumbview.Location = new System.Drawing.Point(267, 43);
-            this.ckThumbview.Name = "ckThumbview";
-            this.ckThumbview.Size = new System.Drawing.Size(92, 19);
-            this.ckThumbview.TabIndex = 14;
-            this.ckThumbview.Text = "Thumb view";
-            this.ckThumbview.UseVisualStyleBackColor = true;
-            this.ckThumbview.CheckedChanged += new System.EventHandler(this.ckThumbview_CheckedChanged);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(367, 37);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(108, 25);
-            this.button1.TabIndex = 11;
-            this.button1.Text = "Rename";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.btnRename_Click);
+            this.txtAfter.Location = new System.Drawing.Point(367, 39);
+            this.txtAfter.Name = "txtAfter";
+            this.txtAfter.Size = new System.Drawing.Size(108, 23);
+            this.txtAfter.TabIndex = 0;
             // 
             // frmManageVideo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(559, 530);
+            this.ClientSize = new System.Drawing.Size(737, 807);
+            this.Controls.Add(this.txtAfter);
             this.Controls.Add(this.ckThumbview);
             this.Controls.Add(this.olvDownload);
             this.Controls.Add(this.ckCompletedVideo);
@@ -256,15 +265,16 @@
         private System.Windows.Forms.Button btnWrongDel;
         private System.Windows.Forms.CheckBox ckCompletedVideo;
         private System.Windows.Forms.ComboBox cbColornew;
-        private BrightIdeasSoftware.ObjectListView olvDownload;
+        private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.CheckBox ckThumbview;
+        private System.Windows.Forms.Button button1;
         private BrightIdeasSoftware.OLVColumn olvColumn1;
         private BrightIdeasSoftware.OLVColumn olvColumn2;
         private BrightIdeasSoftware.OLVColumn olvColSize;
         private BrightIdeasSoftware.OLVColumn olvColumn4;
         private BrightIdeasSoftware.OLVColumn olvColFolder;
         private BrightIdeasSoftware.OLVColumn olvColumn6;
-        private System.Windows.Forms.ImageList imageList1;
-        private System.Windows.Forms.CheckBox ckThumbview;
-        private System.Windows.Forms.Button button1;
+        private BrightIdeasSoftware.ObjectListView olvDownload;
+        private System.Windows.Forms.TextBox txtAfter;
     }
 }

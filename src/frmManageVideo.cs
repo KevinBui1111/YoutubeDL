@@ -155,7 +155,10 @@ namespace YoutubeDL
             DownloadVid vid = (DownloadVid)e.Model;
             if (!File.Exists(getFullfilename(vid)))
                 e.Item.ForeColor = Color.Red;
-            else if (new_channel_id > 0 && vid.channel_id >= new_channel_id)
+            else if ((new_channel_id > 0 || txtAfter.TextLength > 0) &&
+                (new_channel_id == 0 || vid.channel_id >= new_channel_id) &&
+                (txtAfter.TextLength == 0 || vid.filename.CompareTo(txtAfter.Text) > 0)
+                )
                 e.Item.ForeColor = Color.RoyalBlue;
         }
         private void olvDownload_CellRightClick(object sender, CellRightClickEventArgs e)

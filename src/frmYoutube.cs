@@ -478,7 +478,7 @@ namespace YoutubeDL
 
                 if (!complete) continue;
 
-                vid.downloadstatus = 1;
+                vid.downloadstatus = 2;
                 lvDownload.RefreshObject(vid);
 
                 string desFolder = download_path
@@ -735,22 +735,26 @@ namespace YoutubeDL
         {
             frmManageVideo.ShowInstance();
         }
-
         private void btnYtdl_Click(object sender, EventArgs e)
         {
             frmYTdl.ShowInstance();
         }
-
         private void btnMp4Format_Click(object sender, EventArgs e)
         {
-            var itemParse = lvDownload.Objects
-                .Cast<DownloadVid>()
-                .Where(vid => vid.status >= 1)
-                .ToArray();
+            IEnumerable<DownloadVid> itemParse;
+            if (lvDownload.SelectedIndices.Count == 0)
+                itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status >= 1);
+            else
+                itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
             List<string> strange = new List<string>();
             foreach (var vid in itemParse)
             {
+                if (vid.jsonYDL == null)
+                {
+                    strange.Add(vid.vid);
+                    continue;
+                }
                 var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
                 var vidformat = vidInfo.Formats.Where(f => f.Format_Note == "DASH video");
                 var maxw = vidformat.Max(f => f.Width);
