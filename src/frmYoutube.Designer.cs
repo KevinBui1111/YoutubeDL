@@ -204,18 +204,17 @@
             // 
             // cbGroup
             // 
-            this.cbGroup.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
-            this.cbGroup.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.cbGroup.FormattingEnabled = true;
-            this.cbGroup.Location = new System.Drawing.Point(139, 15);
+            this.cbGroup.Location = new System.Drawing.Point(155, 15);
             this.cbGroup.Name = "cbGroup";
-            this.cbGroup.Size = new System.Drawing.Size(79, 23);
+            this.cbGroup.Size = new System.Drawing.Size(142, 23);
             this.cbGroup.TabIndex = 3;
+            this.cbGroup.TextUpdate += new System.EventHandler(this.cbGroup_TextUpdate);
             this.cbGroup.KeyDown += new System.Windows.Forms.KeyEventHandler(this.cbGroup_KeyDown);
+            this.cbGroup.KeyUp += new System.Windows.Forms.KeyEventHandler(this.cbGroup_KeyUp);
             // 
             // btnAutoSelect
             // 
-            this.btnAutoSelect.Location = new System.Drawing.Point(117, 44);
+            this.btnAutoSelect.Location = new System.Drawing.Point(106, 45);
             this.btnAutoSelect.Name = "btnAutoSelect";
             this.btnAutoSelect.Size = new System.Drawing.Size(80, 27);
             this.btnAutoSelect.TabIndex = 4;
@@ -241,7 +240,7 @@
             this.cbChannel.FormattingEnabled = true;
             this.cbChannel.Location = new System.Drawing.Point(12, 15);
             this.cbChannel.Name = "cbChannel";
-            this.cbChannel.Size = new System.Drawing.Size(121, 23);
+            this.cbChannel.Size = new System.Drawing.Size(137, 23);
             this.cbChannel.TabIndex = 6;
             this.cbChannel.SelectedIndexChanged += new System.EventHandler(this.cbChannel_SelectedIndexChanged);
             // 
@@ -393,7 +392,7 @@
             // 
             // btnYtdl
             // 
-            this.btnYtdl.Location = new System.Drawing.Point(117, 77);
+            this.btnYtdl.Location = new System.Drawing.Point(106, 77);
             this.btnYtdl.Name = "btnYtdl";
             this.btnYtdl.Size = new System.Drawing.Size(80, 27);
             this.btnYtdl.TabIndex = 10;
@@ -403,7 +402,7 @@
             // 
             // btnMp4Format
             // 
-            this.btnMp4Format.Location = new System.Drawing.Point(31, 44);
+            this.btnMp4Format.Location = new System.Drawing.Point(12, 45);
             this.btnMp4Format.Name = "btnMp4Format";
             this.btnMp4Format.Size = new System.Drawing.Size(80, 27);
             this.btnMp4Format.TabIndex = 4;
@@ -436,7 +435,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.65 build 16/01/2016";
+            this.Text = "YoutubeDL v2.66 build 16/01/2016";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();

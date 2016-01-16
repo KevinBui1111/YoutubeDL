@@ -25,6 +25,7 @@ namespace YoutubeDL
 
         RepositoryLite repos;
         DownloadVid currentVid;
+        IEnumerable<string> suggestGroup;
         string download_path = (string)Settings.Default["DownloadPath"];
 
         List<Task> tasks;
@@ -39,8 +40,6 @@ namespace YoutubeDL
         Color DOWNLOADING = Color.Crimson;
         Color COMPLETE = Color.Teal;
         Dictionary<int, Color> colorStatus;
-
-        Random rnd = new Random();
 
         public frmYoutube()
         {
@@ -393,6 +392,25 @@ namespace YoutubeDL
                 ChangeGroupVid();
             }
         }
+        private void cbGroup_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Back)
+            {
+                cbGroup.Text = cbGroup.Text.Substring(0, cbGroup.SelectionStart);
+                cbGroup.SelectionStart = cbGroup.Text.Length;
+            }
+        }
+        private void cbGroup_TextUpdate(object sender, EventArgs e)
+        {
+            var txt = cbGroup.Text;
+            string suggest = suggestGroup.FirstOrDefault(s => s.ToLower().StartsWith(txt.ToLower()));
+            if (!string.IsNullOrEmpty(suggest))
+            {
+                cbGroup.Text = suggest;
+                cbGroup.SelectionStart = txt.Length;
+                cbGroup.SelectionLength = suggest.Length - txt.Length;
+            }
+        }
         private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
         {
             var channel = (Channel)cbChannel.SelectedItem;
@@ -636,10 +654,15 @@ namespace YoutubeDL
             {
                 cbGroup.Items.Clear();
                 cbGroup.Items.AddRange(listVid.Select(v => v.group ?? "").Distinct().OrderBy(g => g).ToArray());
+                suggestGroup = listVid
+                    .Where(g => !string.IsNullOrEmpty(g.group))
+                    .GroupBy(g => g.group)
+                    .Select(g => new { group = g.Key, count = g.Count() })
+                    .OrderByDescending(g => g.count)
+                    .Select(g => g.group);
             }
 
-            lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, (listVid.Sum(v => v.size).Value * 1.0 / 1024 / 1024)
-                    .ToString("0.00") + " MB");
+            lbStatus.Text = string.Format("Total {0} vids. Total size {1}", listVid.Length, listVid.Sum(v => v.size).ToReadableSize());
         }
 
         IAsyncResult BeginAsync(Action action, string beginText, string endText)
@@ -769,5 +792,6 @@ namespace YoutubeDL
                 MessageBox.Show(string.Join("\n", strange));
             }
         }
+
     }
 }
