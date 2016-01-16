@@ -50,18 +50,19 @@ namespace YoutubeDL.Models
 
         internal void Insert(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.INSERT_FORMAT,
+            string query = string.Format(Resources.INSERT_FORMAT,
                 SQLiteDatabase.NormalizeParam(c.vid),
                 SQLiteDatabase.NormalizeParam(c.group),
                 SQLiteDatabase.NormalizeParam(c.channel_id),
                 SQLiteDatabase.NormalizeParam(c.date_add)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
         internal void UpdateFormat(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_FORMAT,
+            string query = string.Format(Resources.UPDATE_FORMAT,
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.vidFID),
@@ -79,22 +80,24 @@ namespace YoutubeDL.Models
                 SQLiteDatabase.NormalizeParam(c.filename),
                 SQLiteDatabase.NormalizeParam(c.size),
                 SQLiteDatabase.NormalizeParam(c.status)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
         internal void UpdateStatus(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_STATUS,
+            string query = string.Format(Resources.UPDATE_STATUS,
                 SQLiteDatabase.NormalizeParam(c.vid),
                 SQLiteDatabase.NormalizeParam(c.status)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
         internal void UpdateAfterLoading(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_AFTERLOADING,
+            string query = string.Format(Resources.UPDATE_AFTERLOADING,
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.status),
@@ -102,32 +105,46 @@ namespace YoutubeDL.Models
                 SQLiteDatabase.NormalizeParam(c.fps60 ? 1 : 0),
                 SQLiteDatabase.NormalizeParam(c.date_format),
                 SQLiteDatabase.NormalizeParam(c.jsonYDL)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
         internal void UpdateAfterMerging(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_MERGING,
+            string query = string.Format(Resources.UPDATE_MERGING,
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.status),
                 SQLiteDatabase.NormalizeParam(c.date_merge)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
         internal void UpdateGroup(DownloadVid c)
         {
-            script.AppendLine(string.Format(Resources.UPDATE_GROUP,
+            string query = string.Format(Resources.UPDATE_GROUP,
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.group),
                 SQLiteDatabase.NormalizeParam(c.channel_id)
-            ));
+            );
 
-            if (!begin_update) Commit();
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
         }
+        internal void UpdateFilename(DownloadVid c)
+        {
+            string query = string.Format(Resources.UPDATE_FILENAME,
+                SQLiteDatabase.NormalizeParam(c.vid),
+                SQLiteDatabase.NormalizeParam(c.filename)
+            );
+
+            if (!begin_update) db.ExecuteNonQuery(query);
+            else script.AppendLine(query);
+        }
+
         internal void DeleteVid(string vid)
         {
             db.ExecuteNonQuery(string.Format("DELETE FROM video WHERE vid = '{0}'", vid));
@@ -221,39 +238,6 @@ namespace YoutubeDL.Models
             con.Close();
 
             return list;
-        }
-
-        internal void _UpdateFormat(DownloadVid c)
-        {
-            KeyValuePair<string, object>[] parameters = new KeyValuePair<string, object>[]{
-                new KeyValuePair<string, object>("vidFID", c.vidFID),
-                new KeyValuePair<string, object>("vidUrl", c.vidUrl),
-                new KeyValuePair<string, object>("vidFilename", c.vidFilename),
-                new KeyValuePair<string, object>("vidSize", c.vidSize),
-
-                new KeyValuePair<string, object>("audFID", c.audFID),
-                new KeyValuePair<string, object>("audUrl", c.audUrl),
-                new KeyValuePair<string, object>("audFilename", c.audFilename),
-                new KeyValuePair<string, object>("audSize", c.audSize),
-
-                new KeyValuePair<string, object>("resolution", c.resolution),
-                new KeyValuePair<string, object>("ext", c.ext),
-                new KeyValuePair<string, object>("filename", c.filename),
-                new KeyValuePair<string, object>("size", c.size),
-                new KeyValuePair<string, object>("status", c.status),
-            };
-
-            db.Update("video", parameters, string.Format("vid = '{0}'", c.vid));
-        }
-
-        internal void UpdateFilename(DownloadVid c)
-        {
-            script.AppendLine(string.Format(Resources.UPDATE_FILENAME,
-                SQLiteDatabase.NormalizeParam(c.vid),
-                SQLiteDatabase.NormalizeParam(c.filename)
-            ));
-
-            if (!begin_update) Commit();
         }
     }
 }
