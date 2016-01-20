@@ -160,38 +160,7 @@ namespace YoutubeDL.Models
                                     (showCompleted ? "AND status = 4 " : "AND status >= 0"),
                             channel_id, SQLiteDatabase.Escape(group))
                 );
-            return dt.AsEnumerable().Select(r => new DownloadVid
-            {
-                vid = (string)r["vid"],
-
-                vidFID = r["vidFID"] is DBNull ? null : (string)r["vidFID"],
-                vidUrl = r["vidUrl"] is DBNull ? null : (string)r["vidUrl"],
-                vidFilename = r["vidFilename"] is DBNull ? null : (string)r["vidFilename"],
-                vidSize = r["vidSize"] is DBNull ? (long?)null : Convert.ToInt64(r["vidSize"]),
-
-                audFID = r["audFID"] is DBNull ? null : (string)r["audFID"],
-                audUrl = r["audUrl"] is DBNull ? null : (string)r["audUrl"],
-                audFilename = r["audFilename"] is DBNull ? null : (string)r["audFilename"],
-                audSize = r["audSize"] is DBNull ? (long?)null : Convert.ToInt64(r["audSize"]),
-
-                resolution = r["resolution"] is DBNull ? null : (string)r["resolution"],
-                ext = r["ext"] is DBNull ? null : (string)r["ext"],
-                filename = r["filename"] is DBNull ? null : (string)r["filename"],
-                size = r["size"] is DBNull ? (long?)null : Convert.ToInt64(r["size"]),
-                status = r["status"] is DBNull ? 0 : Convert.ToInt32(r["status"]),
-
-                title = r["title"] is DBNull ? null : (string)r["title"],
-                group = r["group"] is DBNull ? null : (string)r["group"],
-                channel_id = r["channel_id"] is DBNull ? 0 : Convert.ToInt32(r["channel_id"]),
-
-                fps60 = r["fps60"] is DBNull ? false : Convert.ToInt32(r["fps60"]) == 1,
-
-                date_add = r["date_add"] is DBNull ? DateTime.MinValue : Convert.ToInt64(r["date_add"]).FromUnixTime(),
-                date_format = r["date_format"] is DBNull ? (DateTime?)null : Convert.ToInt64(r["date_format"]).FromUnixTime(),
-                date_merge = r["date_merge"] is DBNull ? (DateTime?)null : Convert.ToInt64(r["date_merge"]).FromUnixTime(),
-
-                jsonYDL = r["jsonYDL"] is DBNull ? null : (string)r["jsonYDL"],
-            }).ToArray();
+            return dt.AsEnumerable().Select(r => MapRowToVideo(r)).ToArray();
         }
         internal DownloadVid[] LoadDeletedVideo()
         {
@@ -206,6 +175,13 @@ namespace YoutubeDL.Models
                 group = r["group"] is DBNull ? null : (string)r["group"],
                 channel_id = r["channel_id"] is DBNull ? 0 : Convert.ToInt32(r["channel_id"]),
             }).ToArray();
+        }
+        internal DownloadVid GetVideo(string vid)
+        {
+            DataTable dt = db.GetDataTable(
+                string.Format("select * from video where vid = {0} ", SQLiteDatabase.NormalizeParam(vid))
+                );
+            return dt.AsEnumerable().Select(r => MapRowToVideo(r)).FirstOrDefault();
         }
 
         internal void SaveImage(string vid, byte[] imagen)
@@ -238,6 +214,42 @@ namespace YoutubeDL.Models
             con.Close();
 
             return list;
+        }
+
+        private DownloadVid MapRowToVideo(DataRow r)
+        {
+            return new DownloadVid
+            {
+                vid = (string)r["vid"],
+
+                vidFID = r["vidFID"] is DBNull ? null : (string)r["vidFID"],
+                vidUrl = r["vidUrl"] is DBNull ? null : (string)r["vidUrl"],
+                vidFilename = r["vidFilename"] is DBNull ? null : (string)r["vidFilename"],
+                vidSize = r["vidSize"] is DBNull ? (long?)null : Convert.ToInt64(r["vidSize"]),
+
+                audFID = r["audFID"] is DBNull ? null : (string)r["audFID"],
+                audUrl = r["audUrl"] is DBNull ? null : (string)r["audUrl"],
+                audFilename = r["audFilename"] is DBNull ? null : (string)r["audFilename"],
+                audSize = r["audSize"] is DBNull ? (long?)null : Convert.ToInt64(r["audSize"]),
+
+                resolution = r["resolution"] is DBNull ? null : (string)r["resolution"],
+                ext = r["ext"] is DBNull ? null : (string)r["ext"],
+                filename = r["filename"] is DBNull ? null : (string)r["filename"],
+                size = r["size"] is DBNull ? (long?)null : Convert.ToInt64(r["size"]),
+                status = r["status"] is DBNull ? 0 : Convert.ToInt32(r["status"]),
+
+                title = r["title"] is DBNull ? null : (string)r["title"],
+                group = r["group"] is DBNull ? null : (string)r["group"],
+                channel_id = r["channel_id"] is DBNull ? 0 : Convert.ToInt32(r["channel_id"]),
+
+                fps60 = r["fps60"] is DBNull ? false : Convert.ToInt32(r["fps60"]) == 1,
+
+                date_add = r["date_add"] is DBNull ? DateTime.MinValue : Convert.ToInt64(r["date_add"]).FromUnixTime(),
+                date_format = r["date_format"] is DBNull ? (DateTime?)null : Convert.ToInt64(r["date_format"]).FromUnixTime(),
+                date_merge = r["date_merge"] is DBNull ? (DateTime?)null : Convert.ToInt64(r["date_merge"]).FromUnixTime(),
+
+                jsonYDL = r["jsonYDL"] is DBNull ? null : (string)r["jsonYDL"],
+            };
         }
     }
 }

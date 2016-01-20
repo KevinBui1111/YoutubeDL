@@ -200,11 +200,18 @@ namespace YoutubeDL
             string[] vidIDs = YoutubeDlInfo.GetVideoIDFromUrl(web_url);
             foreach (string id in vidIDs)
             {
-                if (lvDownload.Objects.Cast<DownloadVid>().Any(v => v.vid == id)) continue;
-
-                var vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, channel_id = channel.id, date_add = DateTime.Now };
+                var vid = repos.GetVideo(id);
+                if (vid == null)
+                {
+                    vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, channel_id = channel.id, date_add = DateTime.Now };
+                    repos.Insert(vid);
+                }
+                else if (vid.status == -1)
+                {
+                    vid.status = 0;
+                    repos.UpdateStatus(vid);
+                }
                 lvDownload.AddObject(vid);
-                repos.Insert(vid);
             }
 
             lvDownload.Items[lvDownload.Items.Count - 1].EnsureVisible();
