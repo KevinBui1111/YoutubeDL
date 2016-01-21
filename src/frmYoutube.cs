@@ -205,13 +205,14 @@ namespace YoutubeDL
                 {
                     vid = new DownloadVid { vid = id, group = (string)cbGroup.Text, channel_id = channel.id, date_add = DateTime.Now };
                     repos.Insert(vid);
+                    lvDownload.AddObject(vid);
                 }
                 else if (vid.status == -1)
                 {
                     vid.status = 0;
                     repos.UpdateStatus(vid);
+                    lvDownload.AddObject(vid);
                 }
-                lvDownload.AddObject(vid);
             }
 
             lvDownload.Items[lvDownload.Items.Count - 1].EnsureVisible();

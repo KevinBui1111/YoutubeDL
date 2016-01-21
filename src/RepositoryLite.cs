@@ -147,7 +147,7 @@ namespace YoutubeDL.Models
 
         internal void DeleteVid(string vid)
         {
-            db.ExecuteNonQuery(string.Format("DELETE FROM video WHERE vid = '{0}'", vid));
+            db.ExecuteNonQuery(string.Format("UPDATE video SET status = -1 WHERE vid = '{0}'", vid));
         }
 
         internal DownloadVid[] LoadDownloadVideo(int channel_id, string group, bool showCompleted)
