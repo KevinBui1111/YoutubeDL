@@ -47,6 +47,7 @@
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvDownload = new BrightIdeasSoftware.ObjectListView();
             this.txtAfter = new System.Windows.Forms.TextBox();
+            this.dtpDateMerge = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).BeginInit();
             this.SuspendLayout();
             // 
@@ -229,11 +230,22 @@
             this.txtAfter.Size = new System.Drawing.Size(108, 23);
             this.txtAfter.TabIndex = 0;
             // 
+            // dtpDateMerge
+            // 
+            this.dtpDateMerge.Checked = false;
+            this.dtpDateMerge.CustomFormat = "";
+            this.dtpDateMerge.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpDateMerge.Location = new System.Drawing.Point(481, 39);
+            this.dtpDateMerge.Name = "dtpDateMerge";
+            this.dtpDateMerge.Size = new System.Drawing.Size(108, 23);
+            this.dtpDateMerge.TabIndex = 15;
+            // 
             // frmManageVideo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(737, 807);
+            this.Controls.Add(this.dtpDateMerge);
             this.Controls.Add(this.txtAfter);
             this.Controls.Add(this.ckThumbview);
             this.Controls.Add(this.olvDownload);
@@ -276,5 +288,6 @@
         private BrightIdeasSoftware.OLVColumn olvColumn6;
         private BrightIdeasSoftware.ObjectListView olvDownload;
         private System.Windows.Forms.TextBox txtAfter;
+        private System.Windows.Forms.DateTimePicker dtpDateMerge;
     }
 }
