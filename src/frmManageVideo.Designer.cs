@@ -220,6 +220,7 @@
             this.olvDownload.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.olvDownload_CellRightClick);
             this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
             this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
+            this.olvDownload.Click += new System.EventHandler(this.olvDownload_Click);
             this.olvDownload.DoubleClick += new System.EventHandler(this.olvDownload_DoubleClick);
             this.olvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.olvDownload_KeyUp);
             // 

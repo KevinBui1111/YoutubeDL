@@ -50,6 +50,7 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
+            GC.Collect();
             repos.LoadImage().ForEach(f => dicImage[f._key] = f._image);
 
             queueVidNeedLoad = new BlockingCollection<DownloadVid>();
@@ -171,6 +172,23 @@ namespace YoutubeDL
                     string.Join(Environment.NewLine, olvDownload.SelectedObjects.Cast<DownloadVid>().Select(d => d.filename))
                 );
         }
+        private void olvDownload_Click(object sender, EventArgs e)
+        {
+            if (olvDownload.SelectedIndices.Count >= 2)
+                lbStatus.Text = string.Format("{0} - {1} videos / Total: {2} - {3} video",
+                    olvDownload.SelectedObjects.Cast<DownloadVid>().Sum(v => v.size).ToReadableSize(),
+                    olvDownload.SelectedIndices.Count,
+                    olvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),
+                    olvDownload.GetItemCount()
+                    );
+            else
+            {
+                lbStatus.Text = string.Format("Total: {0} - {1} videos",
+                    olvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),
+                    olvDownload.GetItemCount()
+                    );
+            }
+        }
 
         private void btnRemoveMissing_Click(object sender, EventArgs e)
         {
@@ -208,6 +226,34 @@ namespace YoutubeDL
 
             MessageBox.Show(string.Format("Restore successfully {0} videos: {1}",
                 wrongdel.Count, string.Join(", ", wrongdel.ToArray())));
+        }
+        private void btnRename_Click(object sender, EventArgs e)
+        {
+            var newfilenames = Clipboard.GetText().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+            var vids = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
+            if (vids.Length != newfilenames.Length)
+                MessageBox.Show("Unmatch number of file!");
+            else
+            {
+                for (int i = 0; i < vids.Length; ++i)
+                {
+                    var oldname = getFullfilename(vids[i]);
+                    vids[i].filename = newfilenames[i];
+                    var newname = getFullfilename(vids[i]);
+
+                    try
+                    {
+                        File.Move(oldname, newname);
+                        repos.UpdateFilename(vids[i]);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(vids[i].vid + Environment.NewLine + ex.Message);
+                    }
+                }
+
+                olvDownload.RefreshObjects(olvDownload.SelectedObjects);
+            }
         }
 
         private void ckThumbview_CheckedChanged(object sender, EventArgs e)
@@ -339,36 +385,6 @@ namespace YoutubeDL
                 g.DrawImage(b, left, top, newW, newH);
             return result;
         }
-
-        private void btnRename_Click(object sender, EventArgs e)
-        {
-            var newfilenames = Clipboard.GetText().Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-            var vids = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
-            if (vids.Length != newfilenames.Length)
-                MessageBox.Show("Unmatch number of file!");
-            else
-            {
-                for (int i = 0; i < vids.Length; ++i)
-                {
-                    var oldname = getFullfilename(vids[i]);
-                    vids[i].filename = newfilenames[i];
-                    var newname = getFullfilename(vids[i]);
-
-                    try{
-                        File.Move(oldname, newname);
-                        repos.UpdateFilename(vids[i]);
-                    }
-                    catch(Exception ex)
-                    {
-                        MessageBox.Show(vids[i].vid + Environment.NewLine + ex.Message);
-                    }
-                }
-
-                olvDownload.RefreshObjects(olvDownload.SelectedObjects);
-            }
-        }
-
-
     }
 
     [Serializable()]
