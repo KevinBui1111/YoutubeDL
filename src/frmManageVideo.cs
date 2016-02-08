@@ -24,7 +24,6 @@ namespace YoutubeDL
         RepositoryLite repos = new RepositoryLite();
         Dictionary<int, Channel> dicChannel;
         int new_channel_id;
-        const string vidFolder = @"i:\YDL\";
         BlockingCollection<DownloadVid> queueVidNeedLoad;
         Dictionary<string, Image> dicImage = new Dictionary<string, Image>();
 
@@ -50,7 +49,7 @@ namespace YoutubeDL
         }
         private void frmManageVideo_Load(object sender, EventArgs e)
         {
-            GC.Collect();
+            //GC.Collect();
             repos.LoadImage().ForEach(f => dicImage[f._key] = f._image);
 
             queueVidNeedLoad = new BlockingCollection<DownloadVid>();
@@ -92,6 +91,10 @@ namespace YoutubeDL
         private void frmManageVideo_FormClosed(object sender, FormClosedEventArgs e)
         {
             queueVidNeedLoad.CompleteAdding();
+            dicImage.Clear();
+            imageList1.Images.Clear();
+            imageList1.Dispose();
+            GC.Collect();
         }
 
         private void cbChannel_SelectedIndexChanged(object sender, EventArgs e)
@@ -109,7 +112,7 @@ namespace YoutubeDL
         private void olvDownload_ItemDrag(object sender, ItemDragEventArgs e)
         {
             var vid = (DownloadVid)((OLVListItem)e.Item).RowObject;
-            var selection = new string[] { getFullfilename(vid) };
+            var selection = new string[] { frmYoutube.getFullfilename(vid) };
             DataObject data = new DataObject(DataFormats.FileDrop, selection);
             this.DoDragDrop(data, DragDropEffects.Copy | DragDropEffects.Move);
         }
@@ -119,7 +122,7 @@ namespace YoutubeDL
 
             try
             {
-                Process.Start(getFullfilename(vid));
+                Process.Start(frmYoutube.getFullfilename(vid));
             }
             catch (Exception ex)
             {
@@ -134,9 +137,9 @@ namespace YoutubeDL
 
                 try
                 {
-                    FileSystem.DeleteFile(getFullfilename(vid), UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
+                    FileSystem.DeleteFile(frmYoutube.getFullfilename(vid), UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
 
-                    if (!File.Exists(getFullfilename(vid)))
+                    if (!File.Exists(frmYoutube.getFullfilename(vid)))
                     {
                         vid.status = -1;
                         repos.UpdateStatus(vid);
@@ -154,7 +157,7 @@ namespace YoutubeDL
         private void olvDownload_FormatRow(object sender, BrightIdeasSoftware.FormatRowEventArgs e)
         {
             DownloadVid vid = (DownloadVid)e.Model;
-            if (!File.Exists(getFullfilename(vid)))
+            if (!File.Exists(frmYoutube.getFullfilename(vid)))
                 e.Item.ForeColor = Color.Red;
             else if ((new_channel_id > 0 || txtAfter.TextLength > 0 || vid.date_merge > dtpDateMerge.Value) &&
                 (new_channel_id == 0 || vid.channel_id >= new_channel_id) &&
@@ -200,7 +203,7 @@ namespace YoutubeDL
 
             foreach (var vid in itemParse.ToArray())
             {
-                if (!File.Exists(getFullfilename(vid)))
+                if (!File.Exists(frmYoutube.getFullfilename(vid)))
                 {
                     vid.status = -1;
                     repos.UpdateStatus(vid);
@@ -215,7 +218,7 @@ namespace YoutubeDL
             List<string> wrongdel = new List<string>();
             foreach (var vid in deletedVids)
             {
-                if (File.Exists(getFullfilename(vid)))
+                if (File.Exists(frmYoutube.getFullfilename(vid)))
                 {
                     vid.status = 4;
                     repos.UpdateStatus(vid);
@@ -237,9 +240,9 @@ namespace YoutubeDL
             {
                 for (int i = 0; i < vids.Length; ++i)
                 {
-                    var oldname = getFullfilename(vids[i]);
+                    var oldname = frmYoutube.getFullfilename(vids[i]);
                     vids[i].filename = newfilenames[i];
-                    var newname = getFullfilename(vids[i]);
+                    var newname = frmYoutube.getFullfilename(vids[i]);
 
                     try
                     {
@@ -271,7 +274,7 @@ namespace YoutubeDL
                 {
                     // Get Thumbnail Video;
                     Bitmap shellThumb = ShellFile
-                        .FromFilePath(getFullfilename(vid))
+                        .FromFilePath(frmYoutube.getFullfilename(vid))
                         .Thumbnail
                         .ExtraLargeBitmap;
 
@@ -283,6 +286,7 @@ namespace YoutubeDL
                     repos.SaveImage(vid.vid, Helper.ImageToByte(thumb));
                 }
                 catch (FileNotFoundException) { }
+                catch { }
             }
         }
 
@@ -308,7 +312,11 @@ namespace YoutubeDL
                 foreach (var v in listVid)
                 {
                     if (dicImage.ContainsKey(v.vid))
-                        imageList1.Images.Add(v.vid, dicImage[v.vid]);
+                        try
+                        {
+                            imageList1.Images.Add(v.vid, dicImage[v.vid]);
+                        }
+                        catch { break; }
                 }
 
                 while (queueVidNeedLoad.TryTake(out vid)) ;
@@ -317,51 +325,23 @@ namespace YoutubeDL
 
             lbStatus.Text = string.Format("Total: {0} videos", listVid.Count());
         }
-        string getFullfilename(DownloadVid vid)
-        {
-            if (string.IsNullOrEmpty(vid.group))
-                return string.Format(@"{0}{1}\{2}",
-                    vidFolder, dicChannel[vid.channel_id].folder, vid.filename);
-            else
-                return string.Format(@"{0}{1}\{2}\{3}",
-                    vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
-
-        }
-        void Checkgroup()
-        {
-            var allvid = repos.LoadDownloadVideo(0, null, false);
-            var allfile = new DirectoryInfo(vidFolder).GetFiles("*", System.IO.SearchOption.AllDirectories);
-            var query = from file in allfile
-                        join vid in allvid on file.Name equals vid.filename into gj
-                        from g in gj.DefaultIfEmpty()
-                        select new { file, g };
-
-            //int c = query.Count(q => q.g != null);
-            List<string> resfail = new List<string>();
-            foreach (var r in query)
-            {
-                bool res = false;
-                if (r.file.Directory.Parent.Name == "YDL")
-                    res = r.file.Directory.Name == dicChannel[r.g.channel_id].folder;
-                else
-                    res = r.file.Directory.Parent.Name == dicChannel[r.g.channel_id].folder
-                        && r.file.Directory.Name == r.g.group;
-
-                if (!res)
-                {
-                    r.g.group = r.file.Directory.Name;
-                    repos.UpdateGroup(r.g);
-                    //resfail.Add(r.file.FullName);
-                }
-            }
-
-            //Clipboard.SetText(string.Join("\r\n", resfail.ToArray()));
-        }
 
         void AddToImageList(string key, Image img)
         {
-            dicImage.Add(key, img);
-            olvDownload.Invoke(new Action(() => imageList1.Images.Add(key, img)));
+            if (!dicImage.ContainsKey(key))
+                dicImage.Add(key, img);
+            try
+            {
+                olvDownload.Invoke(new Action(() =>
+                    {
+                        try
+                        {
+                            imageList1.Images.Add(key, img);
+                        }
+                        catch { }
+                    }));
+            }
+            catch { }
 
         }
         Image ResizeBitmap(Bitmap b, int nSize)

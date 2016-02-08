@@ -22,11 +22,13 @@ namespace YoutubeDL
             file_name_format = "{0}_{1}.{2}",
             ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
         public const string YoutubeLink = "https://www.youtube.com/watch?v=";
+        const string vidFolder = @"i:\YDL\";
 
         RepositoryLite repos;
         DownloadVid currentVid;
         IEnumerable<string> suggestGroup;
         string download_path = (string)Settings.Default["DownloadPath"];
+        public static Dictionary<int, Channel> dicChannel;
 
         List<Task> tasks;
         Task mergeTask;
@@ -76,8 +78,11 @@ namespace YoutubeDL
             repos = new RepositoryLite();
 
             // load channel list
+            var channels = repos.Get_Channel_list();
+            dicChannel = channels.ToDictionary(s => s.id);
+
             cbChannel.Items.Add(new Channel { id = 0, name = "All" });
-            cbChannel.Items.AddRange(repos.Get_Channel_list());
+            cbChannel.Items.AddRange(channels);
             cbChannel.SelectedIndex = 0;
 
             txtPath.Text = download_path;
@@ -425,6 +430,17 @@ namespace YoutubeDL
             LoadVideoChannel(channel.id, "All");
 
             lvDownload.AllowDrop = channel.id > 0;
+        }
+
+        public static string getFullfilename(DownloadVid vid)
+        {
+            if (string.IsNullOrEmpty(vid.group))
+                return string.Format(@"{0}{1}\{2}",
+                    vidFolder, dicChannel[vid.channel_id].folder, vid.filename);
+            else
+                return string.Format(@"{0}{1}\{2}\{3}",
+                    vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
+
         }
 
         void download_vid_format_In_Queue(bool single_thread = false)

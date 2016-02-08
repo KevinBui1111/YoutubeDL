@@ -197,6 +197,9 @@ namespace YoutubeDL.Models
         }
         internal List<FlatImage> LoadImage()
         {
+            //Load complete video
+            var listvid = LoadDownloadVideo(0, "All", true).Select(v => v.vid).ToDictionary(v => v, v => 1);
+
             List<FlatImage> list = new List<FlatImage>();
 
             SQLiteConnection con = new SQLiteConnection("Data Source=imagelist.db");
@@ -205,6 +208,8 @@ namespace YoutubeDL.Models
             IDataReader rdr = cmd.ExecuteReader();
             while (rdr.Read())
             {
+                if (!listvid.ContainsKey((string)rdr[0])) continue;
+
                 list.Add(new FlatImage
                 {
                     _key = (string)rdr[0],
