@@ -62,6 +62,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmMove.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmMove.Designer.cs">
+      <DependentUpon>frmMove.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmYoutube.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +99,9 @@
     <Compile Include="RepositoryLite.cs" />
     <Compile Include="SQLiteHelper.cs" />
     <Compile Include="YouTubeModel.cs" />
+    <EmbeddedResource Include="frmMove.resx">
+      <DependentUpon>frmMove.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmYoutube.resx">
       <DependentUpon>frmYoutube.cs</DependentUpon>
       <SubType>Designer</SubType>

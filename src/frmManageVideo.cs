@@ -22,7 +22,6 @@ namespace YoutubeDL
     public partial class frmManageVideo : Form
     {
         RepositoryLite repos = new RepositoryLite();
-        Dictionary<int, Channel> dicChannel;
         int new_channel_id;
         BlockingCollection<DownloadVid> queueVidNeedLoad;
         Dictionary<string, Image> dicImage = new Dictionary<string, Image>();
@@ -59,7 +58,7 @@ namespace YoutubeDL
             Task.Factory.StartNew(bwLoadImage_DoWork);
 
             olvColSize.AspectToStringConverter = delegate(object size) { return ((long?)size).ToReadableSize(); };
-            olvColFolder.AspectToStringConverter = delegate(object channel_id) { return dicChannel[(int)channel_id].folder; };
+            olvColFolder.AspectToStringConverter = delegate(object channel_id) { return frmYoutube.dicChannel[(int)channel_id].folder; };
             this.olvColumn1.ImageGetter = delegate(object row)
             {
                 var vid = (DownloadVid)row;
@@ -73,12 +72,11 @@ namespace YoutubeDL
             {
                 var vid = (DownloadVid)rowObject;
                 if (olvDownload.View == View.LargeIcon)
-                    return string.Format("{0}: {1}", dicChannel[vid.channel_id].folder, vid.filename);
+                    return string.Format("{0}: {1}", frmYoutube.dicChannel[vid.channel_id].folder, vid.filename);
                 else
                     return vid.filename;
             };
             var channels = repos.Get_Channel_list();
-            dicChannel = channels.ToDictionary(s => s.id);
 
             cbColornew.Items.Add(new Channel { id = 0, name = "All" });
             cbColornew.Items.AddRange(channels);
@@ -159,10 +157,10 @@ namespace YoutubeDL
             DownloadVid vid = (DownloadVid)e.Model;
             if (!File.Exists(frmYoutube.getFullfilename(vid)))
                 e.Item.ForeColor = Color.Red;
-            else if ((new_channel_id > 0 || txtAfter.TextLength > 0 || vid.date_merge > dtpDateMerge.Value) &&
+            else if ((new_channel_id > 0 || txtAfter.TextLength > 0 || vid.date_merge > dtpDateMerge.Value.Date) &&
                 (new_channel_id == 0 || vid.channel_id >= new_channel_id) &&
                 (txtAfter.TextLength == 0 || vid.filename.CompareTo(txtAfter.Text) > 0) &&
-                vid.date_merge > dtpDateMerge.Value
+                vid.date_merge > dtpDateMerge.Value.Date
                 )
                 e.Item.ForeColor = Color.RoyalBlue;
         }
@@ -310,14 +308,12 @@ namespace YoutubeDL
                 DownloadVid vid;
                 imageList1.Images.Clear();
                 foreach (var v in listVid)
-                {
                     if (dicImage.ContainsKey(v.vid))
                         try
                         {
                             imageList1.Images.Add(v.vid, dicImage[v.vid]);
                         }
                         catch { break; }
-                }
 
                 while (queueVidNeedLoad.TryTake(out vid)) ;
                 olvDownload.SetObjects(listVid);
@@ -364,6 +360,16 @@ namespace YoutubeDL
             using (Graphics g = Graphics.FromImage((Image)result))
                 g.DrawImage(b, left, top, newW, newH);
             return result;
+        }
+
+        private void btnMove_Click(object sender, EventArgs e)
+        {
+            if (olvDownload.SelectedItems.Count == 0) return;
+
+            IEnumerable<DownloadVid> itemMove;
+            itemMove = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
+            frmMove frm = new frmMove(itemMove);
+            frm.ShowDialog();
         }
     }
 

@@ -22,7 +22,7 @@ namespace YoutubeDL
             file_name_format = "{0}_{1}.{2}",
             ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
         public const string YoutubeLink = "https://www.youtube.com/watch?v=";
-        const string vidFolder = @"i:\YDL\";
+        public const string vidFolder = @"i:\YDL\";
 
         RepositoryLite repos;
         DownloadVid currentVid;
@@ -134,12 +134,19 @@ namespace YoutubeDL
 
             if (lvDownload.SelectedIndices.Count == 0) return;
 
-            SetStatusSuccess(string.Format("{0}/{1} vids selected. Size {2}", lvDownload.SelectedIndices.Count, lvDownload.Items.Count,
-                lvDownload.Objects
-                    .Cast<DownloadVid>()
-                    .Sum(item => item.size)
-                    .ToReadableSize()
-                    ));
+            SetStatusSuccess(lvDownload.SelectedIndices.Count >= 2 ?
+                string.Format("{0} - {1} videos / Total: {2} - {3} video",
+                    lvDownload.SelectedObjects.Cast<DownloadVid>().Sum(v => v.size).ToReadableSize(),
+                    lvDownload.SelectedIndices.Count,
+                    lvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),
+                    lvDownload.GetItemCount()
+                    )
+                :
+                string.Format("Total: {0} - {1} videos",
+                    lvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),
+                    lvDownload.GetItemCount()
+                    )
+            );
 
             currentVid = (DownloadVid)lvDownload.SelectedObjects[0];
             cbGroup.Text = currentVid.group;
@@ -434,12 +441,9 @@ namespace YoutubeDL
 
         public static string getFullfilename(DownloadVid vid)
         {
-            if (string.IsNullOrEmpty(vid.group))
-                return string.Format(@"{0}{1}\{2}",
-                    vidFolder, dicChannel[vid.channel_id].folder, vid.filename);
-            else
-                return string.Format(@"{0}{1}\{2}\{3}",
-                    vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
+            return string.IsNullOrEmpty(vid.group) ?
+                string.Format(@"{0}{1}\{2}",     vidFolder, dicChannel[vid.channel_id].folder, vid.filename) :
+                string.Format(@"{0}{1}\{2}\{3}", vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
 
         }
 

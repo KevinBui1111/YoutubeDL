@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.cbChannel = new System.Windows.Forms.ComboBox();
             this.cbGroup = new System.Windows.Forms.ComboBox();
-            this.btnRemoveMissing = new System.Windows.Forms.Button();
+            this.btnMove = new System.Windows.Forms.Button();
             this.lbStatus = new System.Windows.Forms.Label();
             this.btnWrongDel = new System.Windows.Forms.Button();
             this.ckCompletedVideo = new System.Windows.Forms.CheckBox();
@@ -73,15 +73,15 @@
             this.cbGroup.TabIndex = 7;
             this.cbGroup.SelectedIndexChanged += new System.EventHandler(this.cbGroup_SelectedIndexChanged);
             // 
-            // btnRemoveMissing
+            // btnMove
             // 
-            this.btnRemoveMissing.Location = new System.Drawing.Point(216, 10);
-            this.btnRemoveMissing.Name = "btnRemoveMissing";
-            this.btnRemoveMissing.Size = new System.Drawing.Size(145, 25);
-            this.btnRemoveMissing.TabIndex = 9;
-            this.btnRemoveMissing.Text = "Remove missing vid";
-            this.btnRemoveMissing.UseVisualStyleBackColor = true;
-            this.btnRemoveMissing.Click += new System.EventHandler(this.btnRemoveMissing_Click);
+            this.btnMove.Location = new System.Drawing.Point(261, 10);
+            this.btnMove.Name = "btnMove";
+            this.btnMove.Size = new System.Drawing.Size(100, 25);
+            this.btnMove.TabIndex = 9;
+            this.btnMove.Text = "Move";
+            this.btnMove.UseVisualStyleBackColor = true;
+            this.btnMove.Click += new System.EventHandler(this.btnMove_Click);
             // 
             // lbStatus
             // 
@@ -254,7 +254,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.btnWrongDel);
             this.Controls.Add(this.lbStatus);
-            this.Controls.Add(this.btnRemoveMissing);
+            this.Controls.Add(this.btnMove);
             this.Controls.Add(this.cbColornew);
             this.Controls.Add(this.cbChannel);
             this.Controls.Add(this.cbGroup);
@@ -273,7 +273,7 @@
 
         private System.Windows.Forms.ComboBox cbChannel;
         private System.Windows.Forms.ComboBox cbGroup;
-        private System.Windows.Forms.Button btnRemoveMissing;
+        private System.Windows.Forms.Button btnMove;
         private System.Windows.Forms.Label lbStatus;
         private System.Windows.Forms.Button btnWrongDel;
         private System.Windows.Forms.CheckBox ckCompletedVideo;
