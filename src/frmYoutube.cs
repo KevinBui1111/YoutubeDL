@@ -22,12 +22,11 @@ namespace YoutubeDL
             file_name_format = "{0}_{1}.{2}",
             ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
         public const string YoutubeLink = "https://www.youtube.com/watch?v=";
-        public const string vidFolder = @"i:\YDL\";
 
         RepositoryLite repos;
         DownloadVid currentVid;
         IEnumerable<string> suggestGroup;
-        string download_path = (string)Settings.Default["DownloadPath"];
+        static string vidFolder = (string)Settings.Default["DownloadPath"];
         public static Dictionary<int, Channel> dicChannel;
 
         List<Task> tasks;
@@ -85,7 +84,7 @@ namespace YoutubeDL
             cbChannel.Items.AddRange(channels);
             cbChannel.SelectedIndex = 0;
 
-            txtPath.Text = download_path;
+            txtPath.Text = vidFolder;
         }
         private void frmYoutube_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -297,6 +296,7 @@ namespace YoutubeDL
             {
                 if (vid.status != 2 && vid.status != 3) continue;
 
+                string download_path = Path.Combine(vidFolder, dicChannel[vid.channel_id].folder);
                 var p = new Process
                 {
                     StartInfo =
@@ -441,10 +441,7 @@ namespace YoutubeDL
 
         public static string getFullfilename(DownloadVid vid)
         {
-            return string.IsNullOrEmpty(vid.group) ?
-                string.Format(@"{0}{1}\{2}",     vidFolder, dicChannel[vid.channel_id].folder, vid.filename) :
-                string.Format(@"{0}{1}\{2}\{3}", vidFolder, dicChannel[vid.channel_id].folder, vid.group, vid.filename);
-
+            return Path.Combine(vidFolder, dicChannel[vid.channel_id].folder, vid.group ?? "", vid.filename);
         }
 
         void download_vid_format_In_Queue(bool single_thread = false)
@@ -510,15 +507,14 @@ namespace YoutubeDL
         {
             foreach (DownloadVid vid in lvDownload.Objects.Cast<DownloadVid>().ToArray())
             {
-                //continue;
                 if (token.IsCancellationRequested) return;
-
                 if (vid.status != 3) continue;
 
                 this.Invoke((MethodInvoker)delegate { lvDownload.EnsureModelVisible(vid); });
 
-                var vidFI = new FileInfo(download_path + "\\" + vid.vidFilename);
-                var audFI = new FileInfo(download_path + "\\" + vid.audFilename);
+                string download_path = Path.Combine(vidFolder, dicChannel[vid.channel_id].folder);
+                var vidFI = new FileInfo(Path.Combine(download_path, vid.vidFilename));
+                var audFI = new FileInfo(Path.Combine(download_path, vid.audFilename));
                 bool complete = vidFI.Exists && vidFI.Length == vid.vidSize &&
                                 audFI.Exists && audFI.Length == vid.audSize;
 
@@ -527,12 +523,10 @@ namespace YoutubeDL
                 vid.downloadstatus = 2;
                 lvDownload.RefreshObject(vid);
 
-                string desFolder = download_path
-                    + (string.IsNullOrEmpty(vid.group) ? "" : ("\\" + vid.group));
-                string desFilename = desFolder + "\\" + vid.filename;
+                string desFolder = Path.Combine(download_path, vid.group ?? "");
+                string desFilename = Path.Combine(desFolder, vid.filename);
 
-                if (!Directory.Exists(desFolder))
-                    Directory.CreateDirectory(desFolder);
+                if (!Directory.Exists(desFolder)) Directory.CreateDirectory(desFolder);
 
                 var p = new Process
                 {
@@ -563,8 +557,9 @@ namespace YoutubeDL
                 }
                 else
                 {
-                    File.Delete(download_path + "\\" + vid.vidFilename);
-                    File.Delete(download_path + "\\" + vid.audFilename);
+                    vidFI.Delete();
+                    audFI.Delete();
+
                     vid.status = 4;
                     vid.date_merge = DateTime.Now;
                     repos.UpdateAfterMerging(vid);
@@ -723,10 +718,10 @@ namespace YoutubeDL
         private void btnChangePath_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.SelectedPath = download_path;
+            dlg.SelectedPath = vidFolder;
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Settings.Default["DownloadPath"] = txtPath.Text = download_path = dlg.SelectedPath;
+                Settings.Default["DownloadPath"] = txtPath.Text = vidFolder = dlg.SelectedPath;
                 Settings.Default.Save();
             }
         }
@@ -820,6 +815,5 @@ namespace YoutubeDL
                 MessageBox.Show(string.Join("\n", strange));
             }
         }
-
     }
 }

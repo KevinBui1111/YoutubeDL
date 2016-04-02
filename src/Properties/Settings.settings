@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="DownloadPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">F:\Downloads\Video\YDL</Value>
+      <Value Profile="(Default)">F:\YDL</Value>
     </Setting>
   </Settings>
 </SettingsFile>
