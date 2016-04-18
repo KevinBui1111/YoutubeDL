@@ -441,7 +441,7 @@ namespace YoutubeDL
 
         public static string getFullfilename(DownloadVid vid)
         {
-            return Path.Combine(vidFolder, dicChannel[vid.channel_id].folder, vid.group ?? "", vid.filename);
+            return Path.Combine(vidFolder, dicChannel[vid.channel_id].folder, vid.group ?? "", vid.filename ?? "");
         }
 
         void download_vid_format_In_Queue(bool single_thread = false)
@@ -491,7 +491,7 @@ namespace YoutubeDL
                 else
                 {
                     vid.title = vidInfo.Title;
-                    vid.status = vid.status > 1 ? 2 : 1;
+                    vid.status = 1;
                     vid.jsonYDL = JsonConvert.SerializeObject(vidInfo);
                     vid.date_format = DateTime.Now;
                     vid.fps60 = vidInfo.Formats.Exists(f => f.Fps > 30);
