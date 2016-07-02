@@ -153,8 +153,8 @@ namespace YoutubeDL
             if (string.IsNullOrEmpty(currentVid.jsonYDL)) return;
 
             var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(currentVid.jsonYDL);
-            var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
-            var audFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue).OrderByDescending(f => f.FileSize);
+            var vidFormats = vidInfo.Formats.Where(f => f.Acodec == "none").OrderByDescending(f => f.FileSize);
+            var audFormats = vidInfo.Formats.Where(f => f.Vcodec == "none" && f.FileSize.HasValue).OrderByDescending(f => f.FileSize);
 
             var listitem = new List<ListViewItem>();
             foreach (Formats f in vidFormats)
@@ -366,7 +366,7 @@ namespace YoutubeDL
                 if (vidInfo == null) continue;
 
                 //var maxWebm = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "webm").OrderByDescending(f => f.FileSize).FirstOrDefault();
-                var maxMp4 = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
+                var maxMp4 = vidInfo.Formats.Where(f => f.Acodec == "none" && f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
 
                 Formats vF = maxMp4;
 
@@ -374,16 +374,20 @@ namespace YoutubeDL
                 //else if (maxMp4 == null) vF = maxWebm;
                 //else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
                 //else vF = maxMp4;
-
-                var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Format_Note == "DASH audio" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
-                if (aF == null)
-                    errorItem.Add(vid);
-                else
+                if (vF == null)
                 {
-                    UpdateFormat(vid, vF, aF);
-                    lvDownload.RefreshObject(vid);
-                    repos.UpdateFormat(vid);
+                    errorItem.Add(vid);
+                    continue;
                 }
+                var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Vcodec == "none" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
+                if (aF == null)
+                {
+                    errorItem.Add(vid);
+                    continue;
+                }
+                UpdateFormat(vid, vF, aF);
+                lvDownload.RefreshObject(vid);
+                repos.UpdateFormat(vid);
             }
             lvDownload.EndUpdate();
             repos.Commit();
@@ -612,8 +616,8 @@ namespace YoutubeDL
                 vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(res);
 
                 Regex reg = new Regex(@"^\d+$");
-                var vidFormats = vidInfo.Formats.Where(f => reg.IsMatch(f.Format_Id) && f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
-                var audFormats = vidInfo.Formats.Where(f => reg.IsMatch(f.Format_Id) && f.Format_Note == "DASH audio").OrderByDescending(f => f.FileSize);
+                var vidFormats = vidInfo.Formats.Where(f => reg.IsMatch(f.Format_Id) && f.Acodec == "none").OrderByDescending(f => f.FileSize);
+                var audFormats = vidInfo.Formats.Where(f => reg.IsMatch(f.Format_Id) && f.Vcodec == "none").OrderByDescending(f => f.FileSize);
                 vidInfo.Formats = vidFormats.Union(audFormats).ToList();
             }
 
@@ -741,7 +745,7 @@ namespace YoutubeDL
                 bool res = true;
 
                 var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
-                var vidFormats = vidInfo.Formats.Where(f => f.Format_Note == "DASH video").OrderByDescending(f => f.FileSize);
+                var vidFormats = vidInfo.Formats.Where(f => f.Acodec == "none").OrderByDescending(f => f.FileSize);
 
                 foreach (Formats f in vidFormats)
                 {
@@ -756,7 +760,7 @@ namespace YoutubeDL
 
                 if (!res) continue;
 
-                if (vidInfo.Formats.Any(f => f.Format_Note == "DASH audio" && f.FileSize == null))
+                if (vidInfo.Formats.Any(f => f.Vcodec == "none" && f.FileSize == null))
                     errorItem.Add(vid);
             }
 
@@ -802,7 +806,7 @@ namespace YoutubeDL
                     continue;
                 }
                 var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
-                var vidformat = vidInfo.Formats.Where(f => f.Format_Note == "DASH video");
+                var vidformat = vidInfo.Formats.Where(f => f.Acodec == "none");
                 var maxw = vidformat.Max(f => f.Width);
                 var maxMp4 = vidformat.Where(f => f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
 
