@@ -528,7 +528,8 @@ namespace YoutubeDL
                 lvDownload.RefreshObject(vid);
 
                 string desFolder = Path.Combine(download_path, vid.group ?? "");
-                string desFilename = Path.Combine(desFolder, vid.filename);
+                string filename = GenSafeFilename(desFolder, vid);
+                string desFilename = Path.Combine(desFolder, filename);
 
                 if (!Directory.Exists(desFolder)) Directory.CreateDirectory(desFolder);
 
@@ -566,6 +567,7 @@ namespace YoutubeDL
 
                     vid.status = 4;
                     vid.date_merge = DateTime.Now;
+                    vid.filename = filename;
                     repos.UpdateAfterMerging(vid);
                 }
 
@@ -663,7 +665,7 @@ namespace YoutubeDL
 
             vid.resolution = vF.Width + " x " + vF.Height;
             vid.ext = vF.Ext;
-            vid.filename = new Regex(namePattern).Replace(vid.title, "_") + "." + vF.Ext;
+            //vid.filename = new Regex(namePattern).Replace(vid.title, "_") + "." + vF.Ext;
             vid.size = vF.FileSize + aF.FileSize;
             vid.status = 2;
         }
@@ -818,6 +820,22 @@ namespace YoutubeDL
             {
                 MessageBox.Show(string.Join("\n", strange));
             }
+        }
+
+        string GenSafeFilename(string desFolder, DownloadVid vid)
+        {
+            string name = new Regex(namePattern).Replace(vid.title, "_");
+            string filename = name + "." + vid.ext;
+            string desFilename = Path.Combine(desFolder, filename);
+
+            int i = 1;
+            while (File.Exists(desFilename))
+            {
+                filename = string.Format("{0} {1:00}.{2}", name, i++, vid.ext);
+                desFilename = Path.Combine(desFolder, filename);
+            }
+
+            return filename;
         }
     }
 }

@@ -186,7 +186,8 @@ WHERE vid = {0};</value>
   <data name="UPDATE_MERGING" xml:space="preserve">
     <value>UPDATE video 
 SET status = {1}
-    ,date_merge = {2}
+    ,filename = {2}
+    ,date_merge = {3}
 WHERE vid = {0};</value>
   </data>
   <data name="UPDATE_NEWFIELD" xml:space="preserve">

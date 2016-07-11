@@ -116,6 +116,7 @@ namespace YoutubeDL.Models
                 SQLiteDatabase.NormalizeParam(c.vid),
 
                 SQLiteDatabase.NormalizeParam(c.status),
+                SQLiteDatabase.NormalizeParam(c.filename),
                 SQLiteDatabase.NormalizeParam(c.date_merge)
             );
 
