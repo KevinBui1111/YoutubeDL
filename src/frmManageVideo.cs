@@ -59,7 +59,7 @@ namespace YoutubeDL
 
             olvColSize.AspectToStringConverter = delegate(object size) { return ((long?)size).ToReadableSize(); };
             olvColFolder.AspectToStringConverter = delegate(object channel_id) { return frmYoutube.dicChannel[(int)channel_id].folder; };
-            this.olvColumn1.ImageGetter = delegate(object row)
+            olvColumn1.ImageGetter = delegate(object row)
             {
                 var vid = (DownloadVid)row;
 

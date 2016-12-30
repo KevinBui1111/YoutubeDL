@@ -33,6 +33,7 @@ namespace YoutubeDL
         Task mergeTask;
         ConcurrentQueue<DownloadVid> queueItem = new ConcurrentQueue<DownloadVid>();
         CancellationTokenSource cancelTokenSource;
+        IProgress<string> progressLoadingError;
 
         Color DELETED = Color.DarkGray;
         Color UNLOADED = Color.Gray;
@@ -235,7 +236,7 @@ namespace YoutubeDL
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void btnLoadVid_Click(object sender, EventArgs e)
+        private async void btnLoadVid_Click(object sender, EventArgs e)
         {
             // check any worker is running
             if (isLoadingVid())
@@ -271,7 +272,7 @@ namespace YoutubeDL
                 EnqueueItem(itemParse);
             }
 
-            download_vid_format_In_Queue();
+            await download_vid_format_In_Queue();
         }
         private void btnDelete_Click(object sender, EventArgs e)
         {
@@ -328,7 +329,7 @@ namespace YoutubeDL
             }
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
         }
-        private void btnMerge_Click(object sender, EventArgs e)
+        private async void btnMerge_Click(object sender, EventArgs e)
         {
             if (mergeTask != null && !mergeTask.IsCompleted)
                 cancelTokenSource.Cancel();
@@ -337,17 +338,15 @@ namespace YoutubeDL
                 SetStatusError("Start merging video...");
                 btnMerge.Text = "Stop";
                 cancelTokenSource = new CancellationTokenSource();
-                mergeTask = Task.Factory.StartNew(delegate { task_merging(cancelTokenSource.Token); })
-                    .ContinueWith(delegate
-                    {
-                        SetStatusSuccess("Merging video success.");
-                        btnMerge.Text = "Merge";
-                    }
-                    , TaskScheduler.FromCurrentSynchronizationContext()
-                );
+                mergeTask = Task.Run(() => task_merging(cancelTokenSource.Token));
+
+                await mergeTask;
+
+                SetStatusSuccess("Merging video success.");
+                btnMerge.Text = "Merge";
             }
         }
-        private void btnAutoSelect_Click(object sender, EventArgs e)
+        private async void btnAutoSelect_Click(object sender, EventArgs e)
         {
             IEnumerable<DownloadVid> itemParse;
             if (lvDownload.SelectedIndices.Count == 0)
@@ -403,7 +402,7 @@ namespace YoutubeDL
             {
                 EnqueueItem(errorItem);
 
-                download_vid_format_In_Queue(true);
+                await download_vid_format_In_Queue(true);
             }
 
         }
@@ -448,23 +447,23 @@ namespace YoutubeDL
             return Path.Combine(vidFolder, dicChannel[vid.channel_id].folder, vid.group ?? "", vid.filename ?? "");
         }
 
-        void download_vid_format_In_Queue(bool single_thread = false)
+        async Task download_vid_format_In_Queue(bool single_thread = false)
         {
             if (queueItem.Count == 0) return;
 
             SetStatusError("Start loading video...");
             btnLoadVid.Text = "Stop";
 
+            if (progressLoadingError == null) progressLoadingError = new Progress<string>(error_on_loading_vid);
             int num_thread = single_thread ? 1 : 4;
             tasks = new List<Task>();
             for (int i = 0; i < num_thread; ++i)
-                tasks.Add(Task.Factory.StartNew(() => task_load_vid()));
+                tasks.Add(Task.Run((Action)task_load_vid));
 
-            Task.Factory.ContinueWhenAll(tasks.ToArray(), (res) =>
-            {
-                SetStatusSuccess("Complete loading video.");
-                btnLoadVid.Text = "Load format";
-            }, CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+            await Task.WhenAll(tasks);
+
+            SetStatusSuccess("Complete loading video.");
+            btnLoadVid.Text = "Load format";
         }
         bool isLoadingVid()
         {
@@ -484,13 +483,8 @@ namespace YoutubeDL
 
                 if (vidInfo.error)
                 {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        var frmLog = frmYTLog.GetInstance(this);
-                        frmLog.AddLog(vidInfo.error_message);
-                    });
-
                     vid.downloadstatus = 3;
+                    progressLoadingError.Report(vidInfo.error_message);
                 }
                 else
                 {
@@ -626,6 +620,12 @@ namespace YoutubeDL
             vidInfo.error_message = sb.ToString();
             return vidInfo;
         }
+        void error_on_loading_vid(string error_message)
+        {
+            var frmLog = frmYTLog.GetInstance(this);
+            frmLog.AddLog(error_message);
+        }
+
         void EnqueueItem(IEnumerable<DownloadVid> items)
         {
             DownloadVid vid;
@@ -731,7 +731,7 @@ namespace YoutubeDL
                 Settings.Default.Save();
             }
         }
-        private void btnCheckFormat_Click(object sender, EventArgs e)
+        private async void btnCheckFormat_Click(object sender, EventArgs e)
         {
             IEnumerable<DownloadVid> itemParse;
             if (lvDownload.SelectedIndices.Count == 0)
@@ -740,7 +740,6 @@ namespace YoutubeDL
                 itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
             List<DownloadVid> errorItem = new List<DownloadVid>();
-            //List<string> errorFormat = new List<string>();
 
             foreach (var vid in itemParse)
             {
@@ -754,7 +753,6 @@ namespace YoutubeDL
                     if (f.Width == null || f.Height == null || f.Fps == null || f.FileSize == null)
                     {
                         errorItem.Add(vid);
-                        //errorFormat.Add(f.Format_Id);
                         res = false;
                         break;
                     }
@@ -778,10 +776,8 @@ namespace YoutubeDL
             {
                 EnqueueItem(errorItem);
 
-                download_vid_format_In_Queue(true);
+                await download_vid_format_In_Queue(true);
             }
-
-            //Clipboard.SetText(string.Join(", ", errorFormat.Distinct().ToArray()));
         }
         private void btnVidMan_Click(object sender, EventArgs e)
         {
