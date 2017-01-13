@@ -1,21 +1,17 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using YoutubeDL.Models;
 using BrightIdeasSoftware;
 using Microsoft.WindowsAPICodePack.Shell;
-using System.Threading;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace YoutubeDL
 {
@@ -253,7 +249,7 @@ namespace YoutubeDL
                     }
                 }
 
-                olvDownload.RefreshObjects(olvDownload.SelectedObjects);
+                olvDownload.BuildList();
             }
         }
 
@@ -369,7 +365,7 @@ namespace YoutubeDL
             IEnumerable<DownloadVid> itemMove;
             itemMove = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
             frmMove frm = new frmMove(itemMove);
-            frm.ShowDialog();
+            if (frm.ShowDialog() == DialogResult.OK) olvDownload.BuildList();
         }
     }
 

@@ -454,7 +454,7 @@ namespace YoutubeDL
             SetStatusError("Start loading video...");
             btnLoadVid.Text = "Stop";
 
-            if (progressLoadingError == null) progressLoadingError = new Progress<string>(error_on_loading_vid);
+            progressLoadingError = progressLoadingError ?? new Progress<string>(error_on_loading_vid);
             int num_thread = single_thread ? 1 : 4;
             tasks = new List<Task>();
             for (int i = 0; i < num_thread; ++i)
