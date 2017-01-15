@@ -223,6 +223,8 @@ namespace YoutubeDL
 
             MessageBox.Show(string.Format("Restore successfully {0} videos: {1}",
                 wrongdel.Count, string.Join(", ", wrongdel.ToArray())));
+
+            cbGroup_SelectedIndexChanged(null, null);
         }
         private void btnRename_Click(object sender, EventArgs e)
         {
@@ -365,7 +367,7 @@ namespace YoutubeDL
             IEnumerable<DownloadVid> itemMove;
             itemMove = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
             frmMove frm = new frmMove(itemMove);
-            if (frm.ShowDialog() == DialogResult.OK) olvDownload.BuildList();
+            if (frm.ShowDialog() == DialogResult.OK) cbGroup_SelectedIndexChanged(null, null);
         }
     }
 
