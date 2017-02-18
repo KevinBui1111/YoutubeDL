@@ -200,7 +200,7 @@ namespace YoutubeDL
         {
             DownloadVid vid = (DownloadVid)e.Model;
             e.Item.ForeColor = vid.downloadstatus == 3 ? Color.Red : colorStatus[vid.status];
-            e.Item.BackColor = (vid.downloadstatus == 2) ? Color.LightBlue : Color.Transparent;
+            e.Item.BackColor = (vid.downloadstatus == 2) ? Color.LightBlue : e.Item.BackColor;
         }
 
         private void lvDownload_Dropped(object sender, BrightIdeasSoftware.OlvDropEventArgs e)

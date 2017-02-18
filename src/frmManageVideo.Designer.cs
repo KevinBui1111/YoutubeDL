@@ -208,7 +208,6 @@
             this.olvDownload.GridLines = true;
             this.olvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.olvDownload.HideSelection = false;
-            this.olvDownload.IsSimpleDragSource = true;
             this.olvDownload.LargeImageList = this.imageList1;
             this.olvDownload.Location = new System.Drawing.Point(12, 68);
             this.olvDownload.Name = "olvDownload";
