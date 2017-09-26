@@ -160,15 +160,6 @@ namespace YoutubeDL
                 )
                 e.Item.ForeColor = Color.RoyalBlue;
         }
-        private void olvDownload_CellRightClick(object sender, CellRightClickEventArgs e)
-        {
-            //var vid = (DownloadVid)e.Model;
-            //if (vid != null) Clipboard.SetText(vid.title);
-            if (olvDownload.SelectedObjects.Count > 0)
-                Clipboard.SetText(
-                    string.Join(Environment.NewLine, olvDownload.SelectedObjects.Cast<DownloadVid>().Select(d => d.filename))
-                );
-        }
         private void olvDownload_Click(object sender, EventArgs e)
         {
             if (olvDownload.SelectedIndices.Count >= 2)
@@ -368,6 +359,40 @@ namespace YoutubeDL
             itemMove = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
             frmMove frm = new frmMove(itemMove);
             if (frm.ShowDialog() == DialogResult.OK) cbGroup_SelectedIndexChanged(null, null);
+        }
+
+        private void ctMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = olvDownload.SelectedObjects.Count == 0;
+        }
+
+        private void mn_click(object sender, EventArgs e)
+        {
+            var vids = olvDownload.SelectedObjects.Cast<DownloadVid>().ToArray();
+            ToolStripMenuItem mn = (ToolStripMenuItem)sender;
+            if (mn == mnOpenLoc)
+                Process.Start("explorer.exe", "/select, \"" + frmYoutube.getFullfilename(vids[0]) + "\"");
+            else if (mn == mnCopyFolder)
+                Clipboard.SetText(
+                    string.Join(Environment.NewLine, vids.Select(d => Path.GetDirectoryName(frmYoutube.getFullfilename(d))))
+                );
+            else if (mn == mnCopyname)
+                Clipboard.SetText(
+                    string.Join(Environment.NewLine, vids.Select(d => d.filename))
+                );
+            else if (mn == mnCopyVID)
+                Clipboard.SetText(
+                    string.Join(Environment.NewLine, vids.Select(d => d.vid))
+                );
+            else if (mn == mnCopyUrl)
+                Clipboard.SetText(
+                    string.Join(Environment.NewLine, vids.Select(d => frmYoutube.YoutubeLink + d.vid))
+                );
+            else if (mn == mnMediaInfo)
+                Process.Start(@"C:\Program Files (x86)\K-Lite Codec Pack\Tools\mediainfo.exe",
+                    "\"" + frmYoutube.getFullfilename(vids[0]) + "\"");
+            
+            
         }
     }
 

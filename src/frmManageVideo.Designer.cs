@@ -46,9 +46,17 @@
             this.olvColFolder = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvColumn6 = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.olvDownload = new BrightIdeasSoftware.ObjectListView();
+            this.ctMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnCopyname = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnCopyVID = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnCopyUrl = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnCopyFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnOpenLoc = new System.Windows.Forms.ToolStripMenuItem();
             this.txtAfter = new System.Windows.Forms.TextBox();
             this.dtpDateMerge = new System.Windows.Forms.DateTimePicker();
+            this.mnMediaInfo = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).BeginInit();
+            this.ctMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // cbChannel
@@ -197,6 +205,7 @@
             this.olvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.olvDownload.CellEditUseWholeCell = false;
             this.olvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
             this.olvColumn2,
@@ -204,6 +213,8 @@
             this.olvColumn4,
             this.olvColFolder,
             this.olvColumn6});
+            this.olvDownload.ContextMenuStrip = this.ctMenu;
+            this.olvDownload.Cursor = System.Windows.Forms.Cursors.Default;
             this.olvDownload.FullRowSelect = true;
             this.olvDownload.GridLines = true;
             this.olvDownload.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
@@ -216,12 +227,60 @@
             this.olvDownload.TabIndex = 13;
             this.olvDownload.UseCompatibleStateImageBehavior = false;
             this.olvDownload.View = System.Windows.Forms.View.Details;
-            this.olvDownload.CellRightClick += new System.EventHandler<BrightIdeasSoftware.CellRightClickEventArgs>(this.olvDownload_CellRightClick);
             this.olvDownload.FormatRow += new System.EventHandler<BrightIdeasSoftware.FormatRowEventArgs>(this.olvDownload_FormatRow);
             this.olvDownload.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.olvDownload_ItemDrag);
             this.olvDownload.Click += new System.EventHandler(this.olvDownload_Click);
             this.olvDownload.DoubleClick += new System.EventHandler(this.olvDownload_DoubleClick);
             this.olvDownload.KeyUp += new System.Windows.Forms.KeyEventHandler(this.olvDownload_KeyUp);
+            // 
+            // ctMenu
+            // 
+            this.ctMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnCopyname,
+            this.mnCopyVID,
+            this.mnCopyUrl,
+            this.mnCopyFolder,
+            this.mnOpenLoc,
+            this.mnMediaInfo});
+            this.ctMenu.Name = "ctMenu";
+            this.ctMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.ctMenu.Size = new System.Drawing.Size(169, 158);
+            this.ctMenu.Opening += new System.ComponentModel.CancelEventHandler(this.ctMenu_Opening);
+            // 
+            // mnCopyname
+            // 
+            this.mnCopyname.Name = "mnCopyname";
+            this.mnCopyname.Size = new System.Drawing.Size(168, 22);
+            this.mnCopyname.Text = "Copy file name";
+            this.mnCopyname.Click += new System.EventHandler(this.mn_click);
+            // 
+            // mnCopyVID
+            // 
+            this.mnCopyVID.Name = "mnCopyVID";
+            this.mnCopyVID.Size = new System.Drawing.Size(168, 22);
+            this.mnCopyVID.Text = "Copy VID";
+            this.mnCopyVID.Click += new System.EventHandler(this.mn_click);
+            // 
+            // mnCopyUrl
+            // 
+            this.mnCopyUrl.Name = "mnCopyUrl";
+            this.mnCopyUrl.Size = new System.Drawing.Size(168, 22);
+            this.mnCopyUrl.Text = "Copy url";
+            this.mnCopyUrl.Click += new System.EventHandler(this.mn_click);
+            // 
+            // mnCopyFolder
+            // 
+            this.mnCopyFolder.Name = "mnCopyFolder";
+            this.mnCopyFolder.Size = new System.Drawing.Size(168, 22);
+            this.mnCopyFolder.Text = "Copy folder";
+            this.mnCopyFolder.Click += new System.EventHandler(this.mn_click);
+            // 
+            // mnOpenLoc
+            // 
+            this.mnOpenLoc.Name = "mnOpenLoc";
+            this.mnOpenLoc.Size = new System.Drawing.Size(168, 22);
+            this.mnOpenLoc.Text = "Open file location";
+            this.mnOpenLoc.Click += new System.EventHandler(this.mn_click);
             // 
             // txtAfter
             // 
@@ -239,6 +298,13 @@
             this.dtpDateMerge.Name = "dtpDateMerge";
             this.dtpDateMerge.Size = new System.Drawing.Size(108, 23);
             this.dtpDateMerge.TabIndex = 15;
+            // 
+            // mnMediaInfo
+            // 
+            this.mnMediaInfo.Name = "mnMediaInfo";
+            this.mnMediaInfo.Size = new System.Drawing.Size(168, 22);
+            this.mnMediaInfo.Text = "Media info";
+            this.mnMediaInfo.Click += new System.EventHandler(this.mn_click);
             // 
             // frmManageVideo
             // 
@@ -263,6 +329,7 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmManageVideo_FormClosed);
             this.Load += new System.EventHandler(this.frmManageVideo_Load);
             ((System.ComponentModel.ISupportInitialize)(this.olvDownload)).EndInit();
+            this.ctMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -289,5 +356,12 @@
         private BrightIdeasSoftware.ObjectListView olvDownload;
         private System.Windows.Forms.TextBox txtAfter;
         private System.Windows.Forms.DateTimePicker dtpDateMerge;
+        private System.Windows.Forms.ContextMenuStrip ctMenu;
+        private System.Windows.Forms.ToolStripMenuItem mnOpenLoc;
+        private System.Windows.Forms.ToolStripMenuItem mnCopyname;
+        private System.Windows.Forms.ToolStripMenuItem mnCopyVID;
+        private System.Windows.Forms.ToolStripMenuItem mnCopyFolder;
+        private System.Windows.Forms.ToolStripMenuItem mnCopyUrl;
+        private System.Windows.Forms.ToolStripMenuItem mnMediaInfo;
     }
 }
