@@ -45,8 +45,7 @@ namespace YoutubeDL
 
                 if (!File.Exists(newDes))
                 {
-                    if (!Directory.Exists(Path.GetDirectoryName(newDes)))
-                        Directory.CreateDirectory(Path.GetDirectoryName(newDes));
+                    Directory.CreateDirectory(Path.GetDirectoryName(newDes));
 
                     File.Move(oldFile, newDes);
                     repos.UpdateGroup(vid);

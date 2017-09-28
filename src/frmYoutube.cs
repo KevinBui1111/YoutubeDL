@@ -18,7 +18,7 @@ namespace YoutubeDL
 {
     public partial class frmYoutube : Form
     {
-        const string namePattern = "[\\\\/?:*\"><|]",
+        const string namePattern = "[\\\\/?:*\"><|%#]",
             file_name_format = "{0}_{1}.{2}",
             ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
         public const string YoutubeLink = "https://www.youtube.com/watch?v=";
@@ -46,6 +46,7 @@ namespace YoutubeDL
         public frmYoutube()
         {
             InitializeComponent();
+            this.Text = "YoutubeDL v2.83 build 27/09/2017";
         }
         private void frmYoutube_Load(object sender, EventArgs e)
         {
@@ -444,7 +445,7 @@ namespace YoutubeDL
 
         public static string getFullfilename(DownloadVid vid)
         {
-            return Path.Combine(vidFolder, dicChannel[vid.channel_id].folder, vid.group ?? "", vid.filename ?? "");
+            return Path.Combine(vidFolder, vid.group ?? "zOther", vid.filename ?? "");
         }
 
         async Task download_vid_format_In_Queue(bool single_thread = false)
@@ -832,6 +833,21 @@ namespace YoutubeDL
             }
 
             return filename;
+        }
+
+        void migrate_vid()
+        {
+            var list_vid = repos.LoadDownloadVideo(0, "All", true);
+            foreach (var vid in list_vid)
+            {
+                string fullname = getFullfilename(vid);
+                string newpath = $@"F:\YDL2\{(string.IsNullOrEmpty(vid.group) ? "zOther" : vid.group)}\{vid.filename}";
+                Directory.CreateDirectory(Path.GetDirectoryName(newpath));
+                //var createtime = File.GetCreationTime(fullname);
+
+                File.Move(fullname, newpath);
+                //File.SetCreationTime(newpath, createtime);
+            }
         }
     }
 }
