@@ -6,6 +6,7 @@ using System.Net;
 using System.Drawing;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Threading.Tasks;
 
 namespace YoutubeDL
 {
@@ -132,13 +133,13 @@ namespace YoutubeDL
     }
     public class Helper
     {
-        public static bool CheckForYoutubeConnection()
+        public static async Task<bool> CheckForYoutubeConnectionAsync()
         {
             //return true;
             try
             {
                 using (var client = new WebClient())
-                using (var stream = client.OpenRead("https://www.youtube.com"))
+                using (var stream = await client.OpenReadTaskAsync("https://www.youtube.com"))
                 {
                     return true;
                 }
