@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RunProcessAsTask;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -29,7 +30,7 @@ namespace YoutubeDL
         static string ROOT_PATH = (string)Settings.Default["DownloadPath"];
         public static Dictionary<int, Channel> dicChannel;
 
-        List<Task> tasks;
+        bool flag_complete = true;
         Task mergeTask;
         ConcurrentQueue<DownloadVid> queueItem = new ConcurrentQueue<DownloadVid>();
         CancellationTokenSource cancelTokenSource;
@@ -42,6 +43,8 @@ namespace YoutubeDL
         Color DOWNLOADING = Color.Crimson;
         Color COMPLETE = Color.Teal;
         Dictionary<int, Color> colorStatus;
+
+        int LIMIT_TASK = 4;
 
         public frmYoutube()
         {
@@ -242,7 +245,7 @@ namespace YoutubeDL
         private async void btnLoadVid_Click(object sender, EventArgs e)
         {
             // check any worker is running
-            if (isLoadingVid())
+            if (!flag_complete)
             {
                 DownloadVid vid;
                 List<DownloadVid> vids = new List<DownloadVid>();
@@ -256,6 +259,7 @@ namespace YoutubeDL
                 return;
             }
 
+            flag_complete = false;
             // check connection
             if (!await Helper.CheckForYoutubeConnectionAsync())
             {
@@ -276,6 +280,7 @@ namespace YoutubeDL
             }
 
             await download_vid_format_In_Queue();
+            flag_complete = true;
         }
         private void btnDelete_Click(object sender, EventArgs e)
         {
@@ -457,51 +462,33 @@ namespace YoutubeDL
             btnLoadVid.Text = "Stop";
 
             progressLoadingError = progressLoadingError ?? new Progress<string>(error_on_loading_vid);
-            int num_thread = single_thread ? 1 : 4;
-            tasks = new List<Task>();
-            for (int i = 0; i < num_thread; ++i)
-                tasks.Add(Task.Run((Action)task_load_vid));
 
-            await Task.WhenAll(tasks);
+            await task_load_vidAsync();
 
             SetStatusSuccess("Complete loading video.");
             btnLoadVid.Text = "Load format";
         }
-        bool isLoadingVid()
-        {
-            return tasks != null && tasks.Any(t => !t.IsCompleted);
-        }
 
-        void task_load_vid()
+        async Task task_load_vidAsync()
         {
-            DownloadVid vid;
-            while (queueItem.TryDequeue(out vid))
+            List<Task> limit_task = new List<Task>();
+            while (queueItem.TryDequeue(out DownloadVid vid))
             {
                 vid.downloadstatus = 2; //running
                 lvDownload.RefreshObject(vid);
-                this.Invoke((MethodInvoker)delegate { lvDownload.EnsureModelVisible(vid); });
+                lvDownload.EnsureModelVisible(vid);
 
-                YoutubeDlInfo vidInfo = LoadVideoInfo(vid.vid);
+                Task t = LoadVideoInfoAsync(vid);
+                limit_task.Add(t);
 
-                if (vidInfo.error)
+                if (limit_task.Count == LIMIT_TASK)
                 {
-                    vid.downloadstatus = 3;
-                    progressLoadingError.Report(vidInfo.error_message);
+                    Task complete_task = await Task.WhenAny(limit_task);
+                    limit_task.Remove(complete_task);
                 }
-                else
-                {
-                    vid.title = vidInfo.Title;
-                    vid.status = 1;
-                    vid.jsonYDL = JsonConvert.SerializeObject(vidInfo);
-                    vid.date_format = DateTime.Now;
-                    vid.fps60 = vidInfo.Formats.Exists(f => f.Fps > 30);
-                    vid.downloadstatus = 0;
-
-                    repos.UpdateAfterLoading(vid);
-                }
-
-                lvDownload.RefreshObject(vid);
             }
+
+            await Task.WhenAll(limit_task);
         }
         void task_merging(CancellationToken token)
         {
@@ -576,45 +563,31 @@ namespace YoutubeDL
             }
         }
 
-        YoutubeDlInfo LoadVideoInfo(string vidID)
+        Random rnd = new Random((int)DateTime.Now.Ticks);
+        async Task LoadVideoInfoAsync(DownloadVid vid)
         {
-            //System.Threading.Thread.Sleep(rnd.Next(200, 1000));
-            //return new YoutubeDlInfo { error = true };
-
+            //await Task.Delay(rnd.Next(800, 2500));
+            //vid.status = 1;
+            //vid.downloadstatus = 0;
+            //lvDownload.RefreshObject(vid);
+            //return;
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Start LoadVideoInfo: youtube-dl -j " + vidID);
+            sb.AppendLine("Start LoadVideoInfo: youtube-dl -j " + vid.vid);
 
-            var p = new Process
-            {
-                StartInfo =
-                {
-                    FileName = "youtube-dl",
-                    Arguments = string.Format("-j {0}", YoutubeLink + vidID),
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-
-            p.Start();
-            string res = p.StandardOutput.ReadToEnd();
-            string error = p.StandardError.ReadToEnd();
-            p.WaitForExit();
-            p.Close();
+            ProcessResults procRes = await ProcessEx.RunAsync("youtube-dl", $"-j {YoutubeLink}{vid.vid}");
 
             YoutubeDlInfo vidInfo = null;
 
-            if (string.IsNullOrEmpty(error) == false)
+            if (string.IsNullOrEmpty(procRes.StandardError) == false)
             {
                 vidInfo = new YoutubeDlInfo { error = true };
-                sb.AppendLine(error);
+                sb.AppendLine(procRes.StandardError);
             }
             else
             {
-                sb.AppendLine("Success LoadVideoInfo: " + vidID);
+                sb.AppendLine("Success LoadVideoInfo: " + vid.vid);
 
-                vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(res);
+                vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(procRes.StandardOutput);
 
                 Regex reg = new Regex(@"^\d+$");
                 var vidFormats = vidInfo.Formats.Where(f => reg.IsMatch(f.Format_Id) && f.Acodec == "none").OrderByDescending(f => f.FileSize);
@@ -623,7 +596,24 @@ namespace YoutubeDL
             }
 
             vidInfo.error_message = sb.ToString();
-            return vidInfo;
+
+            if (vidInfo.error)
+            {
+                vid.downloadstatus = 3;
+                progressLoadingError.Report(vidInfo.error_message);
+            }
+            else
+            {
+                vid.title = vidInfo.Title;
+                vid.status = 1;
+                vid.jsonYDL = JsonConvert.SerializeObject(vidInfo);
+                vid.date_format = DateTime.Now;
+                vid.fps60 = vidInfo.Formats.Exists(f => f.Fps > 30);
+                vid.downloadstatus = 0;
+
+                repos.UpdateAfterLoading(vid);
+            }
+            lvDownload.RefreshObject(vid);
         }
         void error_on_loading_vid(string error_message)
         {

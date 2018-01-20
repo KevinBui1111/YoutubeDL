@@ -121,6 +121,7 @@
     <Compile Include="frmManageVideo.Designer.cs">
       <DependentUpon>frmManageVideo.cs</DependentUpon>
     </Compile>
+    <Compile Include="ProcessEx.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepositoryLite.cs" />

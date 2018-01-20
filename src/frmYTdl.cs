@@ -41,8 +41,8 @@ namespace YoutubeDL
                     RedirectStandardError = true
                 }
             };
-            p.OutputDataReceived += p_OutputDataReceived;
-            p.ErrorDataReceived += p_ErrorDataReceived;
+            p.OutputDataReceived += (_, data) => this.Invoke(new Action(() => p_OutputDataReceived(data)));
+            p.ErrorDataReceived += (_, data) => this.Invoke(new Action(() => p_OutputDataReceived(data)));
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
@@ -50,36 +50,30 @@ namespace YoutubeDL
             Clipboard.SetText(p.StartInfo.FileName + " " + p.StartInfo.Arguments);
         }
 
-        private void p_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        private void p_ErrorDataReceived(DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
-            {
-                this.Invoke((MethodInvoker)delegate { txtOutput.AppendText(e.Data + "\n"); });
-            }
+                txtOutput.AppendText(e.Data + Environment.NewLine);
         }
 
-        void p_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        void p_OutputDataReceived(DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
             {
-                this.Invoke((MethodInvoker)delegate {
-                    if (e.Data.StartsWith("[download]  "))
-                    {
-                        txtOutput.Lines = txtOutput.Lines.Take(txtOutput.Lines.Length - 1).ToArray();
-                        txtOutput.AppendText(Environment.NewLine + e.Data);
-                    }
-                    else
-                        txtOutput.AppendText(e.Data + Environment.NewLine); 
-                });
+                if (e.Data.StartsWith("[download]  "))
+                {
+                    txtOutput.Lines = txtOutput.Lines.Take(txtOutput.Lines.Length - 1).ToArray();
+                    txtOutput.AppendText(Environment.NewLine + e.Data);
+                }
+                else
+                    txtOutput.AppendText(e.Data + Environment.NewLine); 
             }
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             if (p != null && !p.HasExited)
-            {
                 p.Kill();
-            }
         }
 
         private void btnPaste_Click(object sender, EventArgs e)
