@@ -39,10 +39,11 @@ namespace YoutubeDL
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
-                }
+                },
+                SynchronizingObject = this
             };
-            p.OutputDataReceived += (_, data) => this.Invoke(new Action(() => p_OutputDataReceived(data)));
-            p.ErrorDataReceived += (_, data) => this.Invoke(new Action(() => p_OutputDataReceived(data)));
+            p.OutputDataReceived += p_OutputDataReceived;
+            p.ErrorDataReceived += p_OutputDataReceived;
             p.Start();
             p.BeginOutputReadLine();
             p.BeginErrorReadLine();
@@ -50,13 +51,13 @@ namespace YoutubeDL
             Clipboard.SetText(p.StartInfo.FileName + " " + p.StartInfo.Arguments);
         }
 
-        private void p_ErrorDataReceived(DataReceivedEventArgs e)
+        private void p_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
                 txtOutput.AppendText(e.Data + Environment.NewLine);
         }
 
-        void p_OutputDataReceived(DataReceivedEventArgs e)
+        void p_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             if (!string.IsNullOrEmpty(e.Data))
             {
@@ -66,7 +67,7 @@ namespace YoutubeDL
                     txtOutput.AppendText(Environment.NewLine + e.Data);
                 }
                 else
-                    txtOutput.AppendText(e.Data + Environment.NewLine); 
+                    txtOutput.AppendText(e.Data + Environment.NewLine);
             }
         }
 

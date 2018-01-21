@@ -27,7 +27,8 @@ namespace YoutubeDL
         RepositoryLite repos;
         DownloadVid currentVid;
         IEnumerable<string> suggestGroup;
-        static string ROOT_PATH = (string)Settings.Default["DownloadPath"];
+        static string ROOT_PATH = Settings.Default.ROOT_PATH;
+        static string IDM_PATH = Settings.Default.IDM_PATH;
         public static Dictionary<int, Channel> dicChannel;
 
         bool flag_complete = true;
@@ -293,7 +294,7 @@ namespace YoutubeDL
                 lvDownload.RemoveObject(item);
             }
         }
-        private void btnDownload_Click(object sender, EventArgs e)
+        private async void btnDownload_Click(object sender, EventArgs e)
         {
             var itemDown = lvDownload.SelectedIndices.Count == 0 ?
                 lvDownload.Objects.Cast<DownloadVid>() : lvDownload.SelectedObjects.Cast<DownloadVid>();
@@ -305,48 +306,37 @@ namespace YoutubeDL
             {
                 if (vid.status != 2 && vid.status != 3) continue;
 
-                var p = new Process
-                {
-                    StartInfo =
-                    {
-                        FileName = @"C:\Program Files (x86)\Internet Download Manager\IDMan.exe",
-                        Arguments = string.Format(idm_format, vid.vidUrl, ROOT_PATH, vid.vidFilename),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    }
-                };
-
-                p.Start();
-                p.WaitForExit();
-                p.Close();
-
-                p.StartInfo.Arguments = string.Format(idm_format, vid.audUrl, ROOT_PATH, vid.audFilename);
-                p.Start();
-                p.WaitForExit();
-                p.Close();
+                await ProcessEx.RunAsync(
+                    IDM_PATH, 
+                    string.Format(idm_format, vid.vidUrl, ROOT_PATH, vid.vidFilename),
+                    this
+                );
+                await ProcessEx.RunAsync(
+                    IDM_PATH,
+                    string.Format(idm_format, vid.audUrl, ROOT_PATH, vid.audFilename),
+                    this
+                );
 
                 if (vid.status != 3)
                 {
                     vid.status = 3;
                     repos.UpdateStatus(vid);
+                    lvDownload.RefreshObject(vid);
                 }
-                lvDownload.RefreshObject(vid);
             }
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
         }
         private async void btnMerge_Click(object sender, EventArgs e)
         {
-            if (mergeTask != null && !mergeTask.IsCompleted)
+            if (mergeTask?.IsCompleted != true)
                 cancelTokenSource.Cancel();
             else
             {
                 SetStatusError("Start merging video...");
                 btnMerge.Text = "Stop";
-                cancelTokenSource = new CancellationTokenSource();
-                mergeTask = Task.Run(() => task_merging(cancelTokenSource.Token));
 
+                cancelTokenSource = new CancellationTokenSource();
+                mergeTask = task_mergingAsync(cancelTokenSource.Token);
                 await mergeTask;
 
                 SetStatusSuccess("Merging video success.");
@@ -490,14 +480,14 @@ namespace YoutubeDL
 
             await Task.WhenAll(limit_task);
         }
-        void task_merging(CancellationToken token)
+        async Task task_mergingAsync(CancellationToken token)
         {
             foreach (DownloadVid vid in lvDownload.Objects.Cast<DownloadVid>().ToArray())
             {
                 if (token.IsCancellationRequested) return;
                 if (vid.status != 3) continue;
 
-                this.Invoke((MethodInvoker)delegate { lvDownload.EnsureModelVisible(vid); });
+                lvDownload.EnsureModelVisible(vid);
 
                 var vidFI = new FileInfo(Path.Combine(ROOT_PATH, vid.vidFilename));
                 var audFI = new FileInfo(Path.Combine(ROOT_PATH, vid.audFilename));
@@ -505,9 +495,7 @@ namespace YoutubeDL
                 if (complete && (vidFI.Length != vid.vidSize
                     || audFI.Length != vid.audSize)
                     )
-                {
                     complete = MessageBox.Show("File size is not matched! Do you want to merge it?", "File size", MessageBoxButtons.YesNo) == DialogResult.Yes;
-                }
 
                 if (!complete) continue;
 
@@ -518,34 +506,20 @@ namespace YoutubeDL
                 string filename = GenSafeFilename(desFolder, vid);
                 string desFilename = Path.Combine(desFolder, filename);
 
-                if (!Directory.Exists(desFolder)) Directory.CreateDirectory(desFolder);
+                Directory.CreateDirectory(desFolder);
 
-                var p = new Process
+                ProcessResults procRes = await ProcessEx.RunAsync(new ProcessStartInfo
                 {
-                    StartInfo =
-                    {
-                        FileName = "ffmpeg",
-                        Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, desFilename),
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardError = true,
-                        WorkingDirectory = ROOT_PATH
-                    }
-                };
 
-                p.Start();
-                string error = p.StandardError.ReadToEnd();
-                p.WaitForExit();
-                int exitcode = p.ExitCode;
-                p.Close();
+                    FileName = "ffmpeg",
+                    Arguments = string.Format(ffmpeg_format, vid.vidFilename, vid.audFilename, desFilename),
+                    WorkingDirectory = ROOT_PATH
+                }, this);
 
-                if (exitcode != 0 || File.Exists(desFilename) == false)
+                if (procRes.ExitCode != 0 || File.Exists(desFilename) == false)
                 {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        var frmLog = frmYTLog.GetInstance(this);
-                        frmLog.AddLog("ERROR on video: " + vid.vid + " - " + error);
-                    });
+                    var frmLog = frmYTLog.GetInstance(this);
+                    frmLog.AddLog("ERROR on video: " + vid.vid + " - " + procRes.StandardError);
                 }
                 else
                 {
@@ -563,9 +537,9 @@ namespace YoutubeDL
             }
         }
 
-        Random rnd = new Random((int)DateTime.Now.Ticks);
         async Task LoadVideoInfoAsync(DownloadVid vid)
         {
+            //Random rnd = new Random((int)DateTime.Now.Ticks);
             //await Task.Delay(rnd.Next(800, 2500));
             //vid.status = 1;
             //vid.downloadstatus = 0;
@@ -574,7 +548,7 @@ namespace YoutubeDL
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Start LoadVideoInfo: youtube-dl -j " + vid.vid);
 
-            ProcessResults procRes = await ProcessEx.RunAsync("youtube-dl", $"-j {YoutubeLink}{vid.vid}");
+            ProcessResults procRes = await ProcessEx.RunAsync("youtube-dl", $"-j {YoutubeLink}{vid.vid}", this);
 
             YoutubeDlInfo vidInfo = null;
 
@@ -696,13 +670,8 @@ namespace YoutubeDL
         }
         void CompleteAsyncCallback(IAsyncResult result)
         {
-            if (lbStatus.InvokeRequired)
-                lbStatus.Invoke(new AsyncCallback(CompleteAsyncCallback), result);
-            else
-            {
-                string endText = (string)result.AsyncState;
-                SetStatusSuccess(endText);
-            }
+            string endText = (string)result.AsyncState;
+            SetStatusSuccess(endText);
         }
 
         void SetStatusError(string text)
@@ -722,7 +691,7 @@ namespace YoutubeDL
             dlg.SelectedPath = ROOT_PATH;
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                Settings.Default["DownloadPath"] = txtPath.Text = ROOT_PATH = dlg.SelectedPath;
+                Settings.Default.ROOT_PATH = txtPath.Text = ROOT_PATH = dlg.SelectedPath;
                 Settings.Default.Save();
             }
         }

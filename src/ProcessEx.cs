@@ -3,7 +3,6 @@ refer to https://github.com/jamesmanning/RunProcessAsTask
 Added: 2018-01-19 07:20 AM
 */
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
@@ -13,10 +12,10 @@ namespace RunProcessAsTask
 {
     public static partial class ProcessEx
     {
-        public static Task<ProcessResults> RunAsync(ProcessStartInfo processStartInfo) 
-            => RunAsync(processStartInfo, CancellationToken.None);
+        public static Task<ProcessResults> RunAsync(ProcessStartInfo processStartInfo, System.ComponentModel.ISynchronizeInvoke synchronizingObject = null)
+            => RunAsync(processStartInfo, CancellationToken.None, synchronizingObject);
 
-        public static async Task<ProcessResults> RunAsync(ProcessStartInfo processStartInfo, CancellationToken cancellationToken)
+        public static async Task<ProcessResults> RunAsync(ProcessStartInfo processStartInfo, CancellationToken cancellationToken, System.ComponentModel.ISynchronizeInvoke synchronizingObject = null)
         {
             // force some settings in the start info so we can capture the output
             processStartInfo.CreateNoWindow = true;
@@ -31,7 +30,8 @@ namespace RunProcessAsTask
 
             var process = new Process {
                 StartInfo = processStartInfo,
-                EnableRaisingEvents = true
+                EnableRaisingEvents = true,
+                SynchronizingObject = synchronizingObject
             };
 
             var standardOutputResults = new TaskCompletionSource<string>();
@@ -86,8 +86,8 @@ namespace RunProcessAsTask
         public static Task<ProcessResults> RunAsync(string fileName)
             => RunAsync(new ProcessStartInfo(fileName));
 
-        public static Task<ProcessResults> RunAsync(string fileName, string arguments)
-            => RunAsync(new ProcessStartInfo(fileName, arguments));
+        public static Task<ProcessResults> RunAsync(string fileName, string arguments, System.ComponentModel.ISynchronizeInvoke synchronizingObject = null)
+            => RunAsync(new ProcessStartInfo(fileName, arguments), synchronizingObject);
     }
     public sealed class ProcessResults : IDisposable
     {

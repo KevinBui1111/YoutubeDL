@@ -2,8 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="YoutubeDL.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="DownloadPath" Type="System.String" Scope="User">
+    <Setting Name="ROOT_PATH" Type="System.String" Scope="User">
       <Value Profile="(Default)">F:\YDL</Value>
+    </Setting>
+    <Setting Name="IDM_PATH" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files (x86)\Internet Download Manager\IDMan.exe</Value>
     </Setting>
   </Settings>
 </SettingsFile>

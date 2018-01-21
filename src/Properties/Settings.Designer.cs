@@ -12,7 +12,7 @@ namespace YoutubeDL.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -26,12 +26,24 @@ namespace YoutubeDL.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("F:\\YDL")]
-        public string DownloadPath {
+        public string ROOT_PATH {
             get {
-                return ((string)(this["DownloadPath"]));
+                return ((string)(this["ROOT_PATH"]));
             }
             set {
-                this["DownloadPath"] = value;
+                this["ROOT_PATH"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files (x86)\\Internet Download Manager\\IDMan.exe")]
+        public string IDM_PATH {
+            get {
+                return ((string)(this["IDM_PATH"]));
+            }
+            set {
+                this["IDM_PATH"] = value;
             }
         }
     }
