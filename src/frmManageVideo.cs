@@ -169,7 +169,7 @@ namespace YoutubeDL
                     olvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),
                     olvDownload.GetItemCount()
                     );
-            else
+            else if (olvDownload.GetItemCount() > 0)
             {
                 lbStatus.Text = string.Format("Total: {0} - {1} videos",
                     olvDownload.Objects.Cast<DownloadVid>().Sum(item => item.size).ToReadableSize(),

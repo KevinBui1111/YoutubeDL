@@ -19,7 +19,7 @@ namespace YoutubeDL
 {
     public partial class frmYoutube : Form
     {
-        const string namePattern = "[\\\\/?:*\"><|%#]",
+        const string namePattern = "[\\\\/?:*\"><|%#\r\n]",
             file_name_format = "{0}_{1}.{2}",
             ffmpeg_format = "-i \"{0}\" -i \"{1}\" -vcodec copy -acodec copy -y \"{2}\"";
         public const string YoutubeLink = "https://www.youtube.com/watch?v=";
@@ -131,6 +131,8 @@ namespace YoutubeDL
                 || e.KeyCode == Keys.Home
                 || e.KeyCode == Keys.End)
                 lvDownload_Click(null, null);
+            else if (e.KeyCode == Keys.Escape)
+                lvDownload.DeselectAll();
         }
         private void lvDownload_Click(object sender, EventArgs e)
         {
@@ -324,11 +326,12 @@ namespace YoutubeDL
                     lvDownload.RefreshObject(vid);
                 }
             }
+            //SetStatusError("Saving video info...");
             BeginAsync(repos.Commit, "Saving video info...", "Saved successful.");
         }
         private async void btnMerge_Click(object sender, EventArgs e)
         {
-            if (mergeTask?.IsCompleted != true)
+            if (mergeTask?.IsCompleted == false)
                 cancelTokenSource.Cancel();
             else
             {
@@ -351,7 +354,6 @@ namespace YoutubeDL
             else
                 itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 
-            //long diffSize = 50 * 1024 * 1024;
 
             repos.BeginUpdate();
             lvDownload.BeginUpdate();
@@ -359,24 +361,8 @@ namespace YoutubeDL
             foreach (DownloadVid vid in itemParse.ToArray())
             {
                 var vidInfo = JsonConvert.DeserializeObject<YoutubeDlInfo>(vid.jsonYDL);
-                if (vidInfo == null) continue;
-
-                //var maxWebm = vidInfo.Formats.Where(f => f.Format_Note == "DASH video" && f.Ext == "webm").OrderByDescending(f => f.FileSize).FirstOrDefault();
-                var maxMp4 = vidInfo.Formats.Where(f => f.Acodec == "none" && f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
-
-                Formats vF = maxMp4;
-
-                //if (maxWebm == null) vF = maxMp4;
-                //else if (maxMp4 == null) vF = maxWebm;
-                //else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
-                //else vF = maxMp4;
-                if (vF == null)
-                {
-                    errorItem.Add(vid);
-                    continue;
-                }
-                var aF = vidInfo.Formats.OrderByDescending(f => f.FileSize).FirstOrDefault(f => f.Vcodec == "none" && f.FileSize.HasValue && f.Ext == (vF.Ext == "webm" ? "webm" : "m4a"));
-                if (aF == null)
+                select_format(vidInfo, out Formats vF, out Formats aF);
+                if (vidInfo == null || vF == null || aF == null)
                 {
                     errorItem.Add(vid);
                     continue;
@@ -402,6 +388,37 @@ namespace YoutubeDL
                 await download_vid_format_In_Queue(true);
             }
 
+        }
+
+        private void select_format_mp4(YoutubeDlInfo vidInfo, out Formats vF, out Formats aF)
+        {
+            vF = aF = null;
+            if (vidInfo == null) return;
+
+            var maxMp4 = vidInfo.Formats.Where(f => f.Acodec == "none" && f.Ext == "mp4").OrderByDescending(f => f.FileSize).FirstOrDefault();
+            aF = vidInfo.Formats.FirstOrDefault(f => f.Vcodec == "none" && f.FileSize.HasValue && f.Ext == (maxMp4.Ext == "webm" ? "webm" : "m4a"));
+            vF = maxMp4;
+        }
+        private void select_format(YoutubeDlInfo vidInfo, out Formats vF, out Formats aF)
+        {
+            vF = aF = null;
+            if (vidInfo == null) return;
+
+            long diffSize = 50 * 1024 * 1024;
+            int? maxH = vidInfo.Formats.Where(f => f.Acodec == "none").Max(f => f.Height);
+
+            var maxWebm = vidInfo.Formats.Where(f => f.Acodec == "none" && f.Ext == "webm" && f.Height == maxH).OrderByDescending(f => f.FileSize).FirstOrDefault();
+            var maxMp4 = vidInfo.Formats.Where(f => f.Acodec == "none" && f.Ext == "mp4" && f.Height == maxH).OrderByDescending(f => f.FileSize).FirstOrDefault();
+
+            if (maxWebm == null) vF = maxMp4;
+            else if (maxMp4 == null) vF = maxWebm;
+            else if (maxMp4.FileSize + diffSize < maxWebm.FileSize) vF = maxWebm;
+            else vF = maxMp4;
+
+            if (vF.Height < maxH) return;
+
+            string ext = vF.Ext;
+            aF = vidInfo.Formats.Where(f => f.Vcodec == "none" && f.Ext == (ext == "webm" ? "webm" : "m4a")).OrderByDescending(f => f.FileSize).FirstOrDefault();
         }
         private void cbGroup_KeyDown(object sender, KeyEventArgs e)
         {
@@ -482,7 +499,10 @@ namespace YoutubeDL
         }
         async Task task_mergingAsync(CancellationToken token)
         {
-            foreach (DownloadVid vid in lvDownload.Objects.Cast<DownloadVid>().ToArray())
+            var process_items = lvDownload.SelectedIndices.Count == 0 ?
+                lvDownload.Objects.Cast<DownloadVid>() : lvDownload.SelectedObjects.Cast<DownloadVid>();
+
+            foreach (DownloadVid vid in process_items.Where(i => i.status == 3).ToArray())
             {
                 if (token.IsCancellationRequested) return;
                 if (vid.status != 3) continue;
@@ -681,6 +701,7 @@ namespace YoutubeDL
         }
         void SetStatusSuccess(string text)
         {
+            if (InvokeRequired) this.Invoke((MethodInvoker)delegate { SetStatusSuccess(text); });
             lbStatus.BackColor = Color.DodgerBlue;
             lbStatus.Text = text;
         }
@@ -699,7 +720,7 @@ namespace YoutubeDL
         {
             IEnumerable<DownloadVid> itemParse;
             if (lvDownload.SelectedIndices.Count == 0)
-                itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status >= 1);
+                itemParse = lvDownload.Objects.Cast<DownloadVid>().Where(vid => vid.status >= 1 && vid.status < 4);
             else
                 itemParse = lvDownload.SelectedObjects.Cast<DownloadVid>();
 

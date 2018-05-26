@@ -307,6 +307,7 @@
             this.lvDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvDownload.CellEditUseWholeCell = false;
             this.lvDownload.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.olvColumn1,
             this.olvColStatus,
@@ -435,7 +436,7 @@
             this.Controls.Add(this.lvAudio);
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "frmYoutube";
-            this.Text = "YoutubeDL v2.83 build 27/09/2017";
+            this.Text = "YoutubeDL v2.85 build 06/05/2018";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmYoutube_FormClosed);
             this.Load += new System.EventHandler(this.frmYoutube_Load);
             ((System.ComponentModel.ISupportInitialize)(this.lvDownload)).EndInit();
