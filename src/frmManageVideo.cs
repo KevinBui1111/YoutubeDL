@@ -155,7 +155,7 @@ namespace YoutubeDL
                 e.Item.ForeColor = Color.Red;
             else if ((new_channel_id > 0 || txtAfter.TextLength > 0 || vid.date_merge > dtpDateMerge.Value.Date) &&
                 (new_channel_id == 0 || vid.channel_id >= new_channel_id) &&
-                (txtAfter.TextLength == 0 || vid.filename.CompareTo(txtAfter.Text) > 0) &&
+                (txtAfter.TextLength == 0 || vid.filename.Contains(txtAfter.Text)) &&
                 vid.date_merge > dtpDateMerge.Value.Date
                 )
                 e.Item.ForeColor = Color.RoyalBlue;

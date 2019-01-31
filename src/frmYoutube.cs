@@ -50,7 +50,7 @@ namespace YoutubeDL
         public frmYoutube()
         {
             InitializeComponent();
-            this.Text = "YoutubeDL v2.83 build 27/09/2017";
+            this.Text = "YoutubeDL v2.85 build 06/07/2018";
         }
         private void frmYoutube_Load(object sender, EventArgs e)
         {
