@@ -1,0 +1,76 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+.gitattributes text eol=lf
+.gitignore   text eol=lf
+*.txt        text eol=lf
+*.css        text eol=lf
+*.js         text eol=lf
+*.json       text eol=lf
+*.html       text eol=lf
+*.htm        text eol=lf
+*.xml        text eol=lf
+*.config     text eol=lf
+*.sql        text eol=lf
+
+*.sln        text eol=lf
+*.cs         text eol=lf
+*.cshtml     text eol=lf
+*.ascx       text eol=lf
+*.aspx       text eol=lf
+*.asax       text eol=lf
+*.csproj     text eol=lf
+*.resx       text eol=lf
+*.ruleset    text eol=lf
+*.sitemap    text eol=lf
+*.master     text eol=lf
+*.wsdl       text eol=lf
+*.xsd        text eol=lf
+*.map        text eol=lf
+*.disco      text eol=lf
+*.skin       text eol=lf
+*.settings   text eol=lf
+
+*.java       text eol=lf
+*.less       text eol=lf
+*.sh         text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.less       text eol=lf
+*.sass       text eol=lf
+*.scss       text eol=lf
+*.properties text eol=lf
+*.md         text eol=lf
+*.ts         text eol=lf
+
+*.bat        text eol=crlf
+*.cmd        text eol=crlf
+*.ps1        text eol=crlf
+
+*.class binary
+*.jar   binary
+*.war   binary
+
+*.bmp   binary
+*.gif   binary
+*.ico   binary
+*.jpg   binary
+*.png   binary
+
+*.ttf   binary
+*.eot   binary
+*.woff  binary
+*.woff2 binary
+
+*.doc   binary
+*.docx  binary
+*.pdf   binary
+*.rtf   binary
+*.dll   binary
+
+## ARCHIVES
+*.7z    binary
+*.gz    binary
+*.rar   binary
+*.tar   binary
+*.zip   binary
